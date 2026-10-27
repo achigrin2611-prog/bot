@@ -16,3 +16,4 @@ fix_pip.py
 fix_socks.py
 test_pypi.py
 check.py
+.env.example‎
