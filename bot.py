@@ -87,14 +87,11 @@ def get_prices_menu():
 # ===== ОБРАБОТЧИКИ =====
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
-    await message.answer_photo(
-        photo="https://images.unsplash.com/photo-1513519245088-0e12b0e45807?w=600",
-        caption=(
-            "Привет! 👋\n\n"
-            "Добро пожаловать в Lelayti!\n\n"
-            "Мы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\n"
-            "Выберите, что вас интересует:"
-        ),
+    await message.answer(
+        "Привет! 👋\n\n"
+        "Добро пожаловать в Lelayti!\n\n"
+        "Мы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\n"
+        "Выберите, что вас интересует:",
         reply_markup=get_main_menu()
     )
 
