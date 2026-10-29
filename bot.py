@@ -203,7 +203,10 @@ async def callback_handler(callback: CallbackQuery):
 
 @dp.message()
 async def text_handler(message: Message):
-    pass
+    if message.photo:
+        await message.answer("📸 Фото получено! Теперь выберите формат и оформление.")
+    elif message.text:
+        await message.answer("Спасибо! Я обработаю ваш ответ.")
 
 
 async def main():
