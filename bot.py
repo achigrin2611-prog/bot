@@ -137,8 +137,18 @@ async def callback_handler(callback: CallbackQuery):
         )
 
     elif data == "order":
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(text="📸 Классическая метрика (София)", callback_data="order_classic"))
+        builder.row(InlineKeyboardButton(text="🎨 Другой дизайн из каталога", callback_data="order_catalog"))
+        builder.row(InlineKeyboardButton(text="✏️ Свой вариант / индивидуальный дизайн", callback_data="order_custom"))
         await callback.message.edit_text(
             text="📝 Оформление заказа\n\nЗаполните, пожалуйста, информацию, чтобы я могла подготовить для вас постер 💛\n\n1/5\nКакой постер вы хотите заказать?",
+            reply_markup=builder.as_markup()
+        )
+
+    elif data.startswith("order_"):
+        await callback.message.edit_text(
+            text="📝 Оформление заказа\n\n2/5\nПрикрепите, пожалуйста, фото\nЕсли у вас несколько фото, можно отправить их одним сообщением.",
             reply_markup=InlineKeyboardBuilder().as_markup()
         )
 
@@ -189,6 +199,11 @@ async def callback_handler(callback: CallbackQuery):
         return
 
     await callback.answer()
+
+
+@dp.message()
+async def text_handler(message: Message):
+    pass
 
 
 async def main():
