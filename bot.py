@@ -18,20 +18,6 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Картинки для категорий
-CATEGORY_IMAGES = {
-    "cat_kids": "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600",
-    "cat_wedding": "https://images.unsplash.com/photo-1519741497674-611481863552?w=600",
-    "cat_family": "https://images.unsplash.com/photo-1511895426328-dc8714191300?w=600",
-    "cat_holiday": "https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=600",
-}
-
-PRODUCT_IMAGES = {
-    "design_all": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600",
-    "design_girl": "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600",
-    "design_boy": "https://images.unsplash.com/photo-1519337265831-281ec6cc8514?w=600",
-}
-
 
 def get_main_menu():
     builder = InlineKeyboardBuilder()
@@ -95,14 +81,11 @@ def get_prices_menu():
 
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
-    await message.answer_photo(
-        photo="https://images.unsplash.com/photo-1513519245088-0e12b0e45807?w=600",
-        caption=(
-            "Привет! 👋\n\n"
-            "Добро пожаловать в Lelayti!\n\n"
-            "Мы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\n"
-            "Выберите, что вас интересует:"
-        ),
+    await message.answer(
+        "Привет! 👋\n\n"
+        "Добро пожаловать в Lelayti!\n\n"
+        "Мы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\n"
+        "Выберите, что вас интересует:",
         reply_markup=get_main_menu()
     )
 
@@ -112,50 +95,56 @@ async def callback_handler(callback: CallbackQuery):
     data = callback.data
 
     if data == "main_menu":
-        await callback.message.edit_caption(
-            caption="Привет! 👋\n\nДобро пожаловать в Lelayti!\n\nМы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\nВыберите, что вас интересует:",
+        await callback.message.edit_text(
+            text="Привет! 👋\n\nДобро пожаловать в Lelayti!\n\nМы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\nВыберите, что вас интересует:",
             reply_markup=get_main_menu()
         )
 
     elif data == "catalog":
-        await callback.message.edit_caption(
-            caption="📁 Каталог\n\nВыберите категорию, чтобы посмотреть примеры работ ✨",
+        await callback.message.edit_text(
+            text="📁 Каталог\n\nВыберите категорию, чтобы посмотреть примеры работ ✨",
             reply_markup=get_catalog_menu()
         )
 
-    elif data in CATEGORY_IMAGES:
-        await callback.message.edit_media(
-            media=types.InputMediaPhoto(CATEGORY_IMAGES[data]),
-            caption=(
-                "👶 Детские метрики\n\n"
-                "Здесь собраны примеры постеров с важными моментами первого года жизни. "
-                "Выберите понравившийся дизайн, чтобы посмотреть подробнее:"
-            ) if data == "cat_kids" else
-                "💒 Свадебные постеры\n\n"
-                "Красивые постеры для молодожёнов и love story" if data == "cat_wedding" else
-                "👨‍👩‍👧 Семейные постеры\n\n"
-                "Семейные фотосессии и travel-коллажи" if data == "cat_family" else
-                "🎉 Праздничные постеры\n\n"
-                "На день рождения и другие события",
-            reply_markup=get_kids_category() if data == "cat_kids" else get_catalog_menu()
+    elif data == "cat_kids":
+        await callback.message.edit_text(
+            text="👶 Детские метрики\n\nЗдесь собраны примеры постеров с важными моментами первого года жизни. Выберите понравившийся дизайн, чтобы посмотреть подробнее:",
+            reply_markup=get_kids_category()
         )
 
-    elif data.startswith("design_") and data in PRODUCT_IMAGES:
-        await callback.message.edit_media(
-            media=types.InputMediaPhoto(PRODUCT_IMAGES[data]),
-            caption="📸 Классическая метрика\nот 1 290 ₽\n\nНежный и лаконичный постер с основными данными о рождении. Можно добавить фото, иллюстрацию и выбрать цветовую гамму.\n\n• Любой текст и оформление\n• Форматы: A4, A3, A2\n• Цифровой файл или печать\n• Срок изготовления: 1–3 дня",
+    elif data == "cat_wedding":
+        await callback.message.edit_text(
+            text="💒 Свадебные постеры\n\nКрасивые постеры для молодожёнов и love story. Выберите понравившийся дизайн:",
+            reply_markup=get_kids_category()
+        )
+
+    elif data == "cat_family":
+        await callback.message.edit_text(
+            text="👨‍👩‍👧 Семейные постеры\n\nСемейные фотосессии и travel-коллажи. Выберите понравившийся дизайн:",
+            reply_markup=get_kids_category()
+        )
+
+    elif data == "cat_holiday":
+        await callback.message.edit_text(
+            text="🎉 Праздничные постеры\n\nНа день рождения и другие события. Выберите понравившийся дизайн:",
+            reply_markup=get_kids_category()
+        )
+
+    elif data.startswith("design_"):
+        await callback.message.edit_text(
+            text="📸 Классическая метрика\nот 1 290 ₽\n\nНежный и лаконичный постер с основными данными о рождении. Можно добавить фото, иллюстрацию и выбрать цветовую гамму.\n\n• Любой текст и оформление\n• Форматы: A4, A3, A2\n• Цифровой файл или печать\n• Срок изготовления: 1–3 дня",
             reply_markup=get_product_card()
         )
 
     elif data == "order":
-        await callback.message.edit_caption(
-            caption="📝 Оформление заказа\n\nЗаполните, пожалуйста, информацию, чтобы я могла подготовить для вас постер 💛\n\n1/5\nКакой постер вы хотите заказать?",
+        await callback.message.edit_text(
+            text="📝 Оформление заказа\n\nЗаполните, пожалуйста, информацию, чтобы я могла подготовить для вас постер 💛\n\n1/5\nКакой постер вы хотите заказать?",
             reply_markup=InlineKeyboardBuilder().as_markup()
         )
 
     elif data == "gift":
-        await callback.message.edit_caption(
-            caption="🎁 Подобрать подарок\n\nНе знаете, что выбрать? Я помогу найти идеальный вариант в зависимости от повода 💕",
+        await callback.message.edit_text(
+            text="🎁 Подобрать подарок\n\nНе знаете, что выбрать? Я помогу найти идеальный вариант в зависимости от повода 💕",
             reply_markup=get_gift_menu()
         )
 
@@ -167,33 +156,33 @@ async def callback_handler(callback: CallbackQuery):
             "gift_family": "👨‍👩‍👧 Для семьи и близких — семейный портрет или коллаж",
             "gift_any": "🎉 На любой праздник — универсальный вариант"
         }
-        await callback.message.edit_caption(caption=gift_texts.get(data, "Выберите подарок из меню"))
+        await callback.message.edit_text(text=gift_texts.get(data, "Выберите подарок из меню"))
 
     elif data == "custom":
-        await callback.message.edit_caption(
-            caption="✏️ Индивидуальный заказ\n\nХотите что-то уникальное? Опишите вашу идею, и я создам постер специально для вас!"
+        await callback.message.edit_text(
+            text="✏️ Индивидуальный заказ\n\nХотите что-то уникальное? Опишите вашу идею, и я создам постер специально для вас!"
         )
 
     elif data == "prices":
-        await callback.message.edit_caption(
-            caption="💰 Цены и доставка\n\nЗдесь вся важная информация о стоимости, форматах, сроках и способах получения.",
+        await callback.message.edit_text(
+            text="💰 Цены и доставка\n\nЗдесь вся важная информация о стоимости, форматах, сроках и способах получения.",
             reply_markup=get_prices_menu()
         )
 
     elif data == "prices_list":
-        await callback.message.edit_caption(text="💰 Цены на постеры\n\nКлассическая метрика — от 1 290 ₽\nАрт-метрика — от 1 290 ₽\nМетрика с фото — от 1 490 ₽")
+        await callback.message.edit_text(text="💰 Цены на постеры\n\nКлассическая метрика — от 1 290 ₽\nАрт-метрика — от 1 290 ₽\nМетрика с фото — от 1 490 ₽")
 
     elif data == "formats":
-        await callback.message.edit_caption(text="📐 Форматы и материалы\n\nA4, A3, A2 — на выбор\nПлотная матовая или глянцевая бумага")
+        await callback.message.edit_text(text="📐 Форматы и материалы\n\nA4, A3, A2 — на выбор\nПлотная матовая или глянцевая бумага")
 
     elif data == "terms":
-        await callback.message.edit_caption(text="⏰ Сроки изготовления\n\n1–3 рабочих дня\nСрочные заказы — обсуждаются индивидуально")
+        await callback.message.edit_text(text="⏰ Сроки изготовления\n\n1–3 рабочих дня\nСрочные заказы — обсуждаются индивидуально")
 
     elif data == "delivery":
-        await callback.message.edit_caption(text="🚚 Доставка\n\nЭлектронная версия — сразу после оплаты\nПечать и отправка — 2–5 дней")
+        await callback.message.edit_text(text="🚚 Доставка\n\nЭлектронная версия — сразу после оплаты\nПечать и отправка — 2–5 дней")
 
     elif data == "payment":
-        await callback.message.edit_caption(text="💳 Способы оплаты\n\nПеревод на карту, СБП, ЮMoney")
+        await callback.message.edit_text(text="💳 Способы оплаты\n\nПеревод на карту, СБП, ЮMoney")
 
     elif data == "contact":
         await callback.answer("💬 Связаться со мной\n\nНапишите мне в личные сообщения!")
