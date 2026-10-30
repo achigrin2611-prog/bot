@@ -61,7 +61,7 @@
             color: white;
         }
 
-        /* Главный экран (без картинки, только градиент) */
+        /* Главный экран с картинкой .jpeg */
         .hero {
             height: 100vh;
             display: flex;
@@ -69,7 +69,8 @@
             justify-content: center;
             text-align: center;
             padding: 0 20px;
-            background: linear-gradient(135deg, #faf8f5 0%, #f0ece4 100%);
+            /* Вот тут мы поменяли на .jpeg и добавили затемнение */
+            background: linear-gradient(rgba(250, 248, 245, 0.75), rgba(250, 248, 245, 0.9)), url('bg.jpeg') center/cover no-repeat;
         }
 
         .hero h1 {
