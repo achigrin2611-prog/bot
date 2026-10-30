@@ -69,11 +69,15 @@ def get_catalog_menu():
     return builder.as_markup()
 
 
-def get_kids_category(back_to="catalog"):
+# ОБНОВЛЕННАЯ ФУНКЦИЯ: кнопки мальчик/девочка только для детских
+def get_kids_category(back_to="catalog", category_type="kids"):
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text="Все дизайны", callback_data="design_all"))
-    builder.row(InlineKeyboardButton(text="Для девочки", callback_data="design_girl"))
-    builder.row(InlineKeyboardButton(text="Для мальчика", callback_data="design_boy"))
+
+    if category_type == "kids":
+        builder.row(InlineKeyboardButton(text="Для девочки", callback_data="design_girl"))
+        builder.row(InlineKeyboardButton(text="Для мальчика", callback_data="design_boy"))
+
     builder.row(InlineKeyboardButton(text="🔙 Назад", callback_data=back_to))
     return builder.as_markup()
 
@@ -198,13 +202,16 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     elif data == "catalog":
         await callback.message.edit_text(text="📁 Каталог\n\nВыберите категорию:", reply_markup=get_catalog_menu())
 
+    # ОБНОВЛЕНО: передаем тип категории
     elif data in ["cat_kids", "cat_wedding", "cat_family"]:
         texts = {
             "cat_kids": "👶 Детские метрики\n\nВыберите дизайн:",
             "cat_wedding": "💒 Свадебные постеры\n\nВыберите дизайн:",
             "cat_family": "👨‍👩‍👧 Семейные постеры\n\nВыберите дизайн:"
         }
-        await callback.message.edit_text(text=texts[data], reply_markup=get_kids_category(back_to="catalog"))
+        cat_type = "kids" if data == "cat_kids" else "other"
+        await callback.message.edit_text(text=texts[data],
+                                         reply_markup=get_kids_category(back_to="catalog", category_type=cat_type))
 
     elif data.startswith("design_"):
         await callback.message.edit_text(text="📸 Классическая метрика\nот 1 290 ₽\n\nВыберите действие:",
@@ -229,15 +236,20 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     elif data == "gift":
         await callback.message.edit_text(text="🎁 Подобрать подарок\n\nВыберите повод:", reply_markup=get_gift_menu())
 
+    # ОБНОВЛЕНО: передаем тип категории для подарков
     elif data in ["gift_baby", "gift_birthday", "gift_wedding", "gift_family"]:
         if data in ["gift_baby", "gift_birthday"]:
             text = "👶 Детские метрики\n\nВыберите дизайн:"
+            cat_type = "kids"
         elif data == "gift_wedding":
             text = "💒 Свадебные постеры\n\nВыберите дизайн:"
+            cat_type = "other"
         else:
             text = "👨‍👩‍👧 Семейные постеры\n\nВыберите дизайн:"
+            cat_type = "other"
 
-        await callback.message.edit_text(text=text, reply_markup=get_kids_category(back_to="gift"))
+        await callback.message.edit_text(text=text,
+                                         reply_markup=get_kids_category(back_to="gift", category_type=cat_type))
 
     elif data == "custom":
         await state.set_state(OrderState.waiting_for_custom_text)
@@ -367,8 +379,6 @@ WEBHOOK_SECRET = "my-secret-token"
 
 def main():
     app = web.Application()
-
-    # Важно: setup_application сам настраивает on_startup и on_shutdown
     setup_application(app, dp, bot=bot)
 
     webhook_requests_handler = SimpleRequestHandler(
