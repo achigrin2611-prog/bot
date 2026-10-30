@@ -69,7 +69,8 @@
             justify-content: center;
             text-align: center;
             padding: 0 20px;
-            background: linear-gradient(rgba(250, 248, 245, 0.8), rgba(250, 248, 245, 0.9)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop') center/cover;
+            /* ВОТ ЗДЕСЬ МЫ ЗАМЕНИЛИ ССЫЛКУ НА ЛОКАЛЬНУЮ КАРТИНКУ bg.jpg */
+            background: linear-gradient(rgba(250, 248, 245, 0.8), rgba(250, 248, 245, 0.9)), url('bg.jpg') center/cover;
         }
 
         .hero h1 {
@@ -431,7 +432,6 @@
                 return;
             }
 
-            // Формируем красивый текст
             let text = `Здравствуйте! Хочу заказать постер.\n\n`;
             text += `Имя: ${name}\n`;
             text += `Контакт: ${contact}\n`;
@@ -440,13 +440,9 @@
                 text += `Пожелания: ${comment}\n`;
             }
 
-            // Кодируем текст для ссылки
             const encodedText = encodeURIComponent(text);
-
-            // ЗАМЕНИ lelayti_bot на юзернейм своего бота!
             const botLink = `https://t.me/lelayti_bot?text=${encodedText}`;
 
-            // Открываем бота
             window.open(botLink, '_blank');
         }
     </script>
