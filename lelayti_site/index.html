@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lelayti — Храню ваши воспоминания</title>
+    <style>
+        /* Базовые настройки */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+            background-color: #faf8f5;
+            color: #333;
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        h1, h2, h3 {
+            font-weight: normal;
+            color: #2c2c2c;
+            margin-top: 0;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        /* Шапка */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: rgba(250, 248, 245, 0.95);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            box-sizing: border-box;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 28px;
+            letter-spacing: 3px;
+            text-transform: lowercase;
+            color: #4a4a4a;
+        }
+
+        .header-btn {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            padding: 10px 20px;
+            border: 1px solid #7b8b6f;
+            color: #7b8b6f;
+            border-radius: 30px;
+            transition: all 0.3s;
+        }
+
+        .header-btn:hover {
+            background-color: #7b8b6f;
+            color: white;
+        }
+
+        /* Главный экран */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+            background: linear-gradient(rgba(250, 248, 245, 0.8), rgba(250, 248, 245, 0.9)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop') center/cover;
+        }
+
+        .hero h1 {
+            font-size: 52px;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 22px;
+            margin-bottom: 40px;
+            color: #555;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 18px 45px;
+            background-color: #7b8b6f;
+            color: white;
+            border-radius: 40px;
+            font-size: 18px;
+            transition: background-color 0.3s, transform 0.2s;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 4px 15px rgba(123, 139, 111, 0.3);
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn:hover {
+            background-color: #5a664f;
+            transform: translateY(-2px);
+        }
+
+        /* Блок Преимуществ */
+        .features {
+            padding: 80px 5%;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .features h2 {
+            font-size: 36px;
+            margin-bottom: 50px;
+        }
+
+        .features-grid {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-item {
+            flex: 1;
+            min-width: 250px;
+            padding: 30px;
+            background-color: #faf8f5;
+            border-radius: 20px;
+            transition: transform 0.3s;
+        }
+
+        .feature-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .feature-item p {
+            color: #777;
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+        }
+
+        /* Галерея (Заглушки) */
+        .gallery {
+            padding: 80px 5%;
+            background-color: #faf8f5;
+            text-align: center;
+        }
+
+        .gallery h2 {
+            font-size: 36px;
+            margin-bottom: 50px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .placeholder {
+            width: 100%;
+            height: 300px;
+            background-color: #e8e4db;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #8c8c8c;
+            font-family: Arial, sans-serif;
+            border: 2px dashed #c4bcae;
+            transition: background-color 0.3s;
+        }
+
+        .placeholder:hover {
+            background-color: #dfd9cd;
+        }
+
+        .placeholder span {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* Блок "Как это работает" */
+        .how-it-works {
+            padding: 80px 5%;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .how-it-works h2 {
+            font-size: 36px;
+            margin-bottom: 50px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            text-align: left;
+        }
+
+        .step-number {
+            font-size: 48px;
+            color: #7b8b6f;
+            margin-bottom: 10px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+        }
+
+        .step h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .step p {
+            color: #777;
+            font-size: 16px;
+        }
+
+        /* Блок формы заказа */
+        .order-section {
+            padding: 80px 5%;
+            background-color: #f0ece4;
+            text-align: center;
+        }
+
+        .order-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .order-section p {
+            color: #555;
+            margin-bottom: 40px;
+            font-family: Arial, sans-serif;
+        }
+
+        .order-form {
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #4a4a4a;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #7b8b6f;
+        }
+
+        /* Подвал */
+        footer {
+            text-align: center;
+            padding: 40px;
+            background-color: #faf8f5;
+            color: #888;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">lelayti</div>
+        <a href="#order-form" class="header-btn">Оформить заказ</a>
+    </header>
+
+    <section class="hero">
+        <div>
+            <h1>Храню ваши воспоминания</h1>
+            <p>Создаём персонализированные постеры, которые сохранят самые важные моменты вашей жизни на долгие годы.</p>
+            <a href="#order-form" class="btn">Оставить заявку</a>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2>Почему выбирают нас</h2>
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">🖼️</div>
+                <h3>Индивидуальный дизайн</h3>
+                <p>Мы не используем шаблоны. Каждый постер создается с любовью под вашу историю.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">✨</div>
+                <h3>Премиум качество</h3>
+                <p>Используем только плотную матовую бумагу и качественную печать для долговечности.</p>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">⚡</div>
+                <h3>Быстро и удобно</h3>
+                <p>Оформление заказа занимает пару минут. Доставка от 1 дня.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery">
+        <h2>Наши работы</h2>
+        <div class="grid">
+            <div class="placeholder">
+                <span>📸</span>
+                Скоро здесь появится<br>детская метрика
+            </div>
+            <div class="placeholder">
+                <span>💒</span>
+                Скоро здесь появится<br>свадебный постер
+            </div>
+            <div class="placeholder">
+                <span>👨‍👩‍👧</span>
+                Скоро здесь появится<br>семейный коллаж
+            </div>
+            <div class="placeholder">
+                <span>✨</span>
+                Скоро здесь появится<br>ваша история
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <h2>Как это работает?</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">01</div>
+                <h3>Выбираете дизайн</h3>
+                <p>Открываете каталог в нашем боте и выбираете понравившийся шаблон.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">02</div>
+                <h3>Присылаете фото</h3>
+                <p>Делитесь с нами вашими любимыми снимками и пожеланиями.</p>
+            </div>
+            <div class="step">
+                <div class="step-number">03</div>
+                <h3>Получаете готовый файл</h3>
+                <p>После оплаты мы создаём макет и отправляем вам готовый файл для печати.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Блок с формой заказа -->
+    <section class="order-section" id="order-form">
+        <h2>Оставить заявку</h2>
+        <p>Заполните форму ниже, и мы свяжемся с вами для обсуждения деталей.</p>
+
+        <div class="order-form">
+            <div class="form-group">
+                <label for="name">Ваше имя</label>
+                <input type="text" id="name" placeholder="Как к вам обращаться?" required>
+            </div>
+            <div class="form-group">
+                <label for="contact">Контакт для связи (Telegram или телефон)</label>
+                <input type="text" id="contact" placeholder="@username или +7..." required>
+            </div>
+            <div class="form-group">
+                <label for="comment">Комментарий к заказу</label>
+                <textarea id="comment" placeholder="Какой постер хотите? Есть ли пожелания по дизайну?"></textarea>
+            </div>
+            <button class="btn" onclick="sendOrder()" style="width: 100%;">Отправить в Telegram</button>
+        </div>
+    </section>
+
+    <footer>
+        &copy; 2024 Lelayti. Все права защищены.
+    </footer>
+
+    <script>
+        function sendOrder() {
+            const name = document.getElementById('name').value.trim();
+            const contact = document.getElementById('contact').value.trim();
+            const comment = document.getElementById('comment').value.trim();
+
+            if (!name || !contact) {
+                alert('Пожалуйста, заполните имя и контакт для связи.');
+                return;
+            }
+
+            // Формируем красивый текст
+            let text = `Здравствуйте! Хочу заказать постер.\n\n`;
+            text += `Имя: ${name}\n`;
+            text += `Контакт: ${contact}\n`;
+
+            if (comment) {
+                text += `Пожелания: ${comment}\n`;
+            }
+
+            // Кодируем текст для ссылки
+            const encodedText = encodeURIComponent(text);
+
+            // ЗАМЕНИ lelayti_bot на юзернейм своего бота!
+            const botLink = `https://t.me/lelayti_bot?text=${encodedText}`;
+
+            // Открываем бота
+            window.open(botLink, '_blank');
+        }
+    </script>
+</body>
+</html>
