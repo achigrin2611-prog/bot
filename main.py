@@ -365,22 +365,11 @@ WEBHOOK_PATH = "/webhook"
 WEBHOOK_SECRET = "my-secret-token"
 
 
-async def on_startup(bot: Bot):
-    if RENDER_EXTERNAL_URL:
-        webhook_url = f"{RENDER_EXTERNAL_URL}{WEBHOOK_PATH}"
-        await bot.set_webhook(webhook_url, secret_token=WEBHOOK_SECRET)
-        logger.info(f"Webhook установлен на {webhook_url}")
-    else:
-        logger.warning("RENDER_EXTERNAL_URL не задан! Вебхук не установлен.")
-
-
-async def on_shutdown(bot: Bot):
-    await bot.delete_webhook()
-    logger.info("Webhook удален")
-
-
 def main():
     app = web.Application()
+
+    # Важно: setup_application сам настраивает on_startup и on_shutdown
+    setup_application(app, dp, bot=bot)
 
     webhook_requests_handler = SimpleRequestHandler(
         dispatcher=dp,
@@ -393,9 +382,6 @@ def main():
         return web.Response(text="OK")
 
     app.router.add_get("/", healthcheck)
-
-    app.on_startup.append(on_startup)
-    app.on_shutdown.append(on_shutdown)
 
     web.run_app(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
 
