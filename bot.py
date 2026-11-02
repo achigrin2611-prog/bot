@@ -27,6 +27,11 @@ PHONE_NUMBER = "+79066905758"
 DEPOSIT_AMOUNT = 645
 ANASTASIYA_ID = 5745114091
 
+# --- СТИКЕРЫ БРЕНДА ---
+STICKER_ORDER = "CAACAgIAAxkBAAEkJA9q6K9zeCfsHMxZ2HgfedUU1iLhGAACOqgAApuXSUvuFe6M-xon9D0E"  # Пакет
+STICKER_START = "CAACAgIAAxkBAAEkJBVq6K-N3MVnqKBwEjhtDMCCGful5gACQ6YAAoJkQEtet_8phbM6Fj0E"  # Конверт
+STICKER_WAIT = "CAACAgIAAxkBAAEkJBlq6K-a13bIOw-fej19oPIs5zVWEwACUKoAAiOXQUtHcz2cFZj2RT0E"  # Котик
+
 
 # --- МАШИНА СОСТОЯНИЙ (FSM) ---
 class OrderState(StatesGroup):
@@ -143,6 +148,9 @@ async def cmd_start(message: Message, state: FSMContext):
         return
 
     # Если текста нет (обычный /start), показываем меню
+    # Отправляем стикер-конверт
+    await message.answer_sticker(STICKER_START)
+
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text="✨ Начать", callback_data="main_menu"))
 
@@ -174,6 +182,9 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     data = callback.data
 
     if data == "pay_sber":
+        # Отправляем стикер-котика перед просьбой об оплате
+        await callback.message.answer_sticker(STICKER_WAIT)
+
         await callback.message.edit_text(
             f"💳 **Оплата через СБП (Сбер)**\n\n"
             f"Сумма к оплате: **{DEPOSIT_AMOUNT} ₽**\n\n"
@@ -292,6 +303,9 @@ async def text_handler(message: Message, state: FSMContext):
 
     elif current_state == OrderState.waiting_for_details.state:
         await state.update_data(order_text=message.text, username=message.from_user.username or "скрыт")
+
+        # Отправляем стикер-пакет после того, как клиент прислал детали
+        await message.answer_sticker(STICKER_ORDER)
 
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text="💳 Оплатить через СБП (Сбер)", callback_data="pay_sber"))
