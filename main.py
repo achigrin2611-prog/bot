@@ -1,8 +1,8 @@
 import os
 import logging
+import asyncio
 import urllib.parse
 from dotenv import load_dotenv
-from aiohttp import web
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -10,7 +10,6 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, ReplyKey
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 
 load_dotenv()
 
@@ -27,6 +26,11 @@ dp = Dispatcher()
 PHONE_NUMBER = "+79066905758"
 DEPOSIT_AMOUNT = 645
 ANASTASIYA_ID = 5745114091
+
+# --- СТИКЕРЫ БРЕНДА ---
+STICKER_ORDER = "CAACAgIAAxkBAAEkJA9q6K9zeCfsHMxZ2HgfedUU1iLhGAACOqgAApuXSUvuFe6M-xon9D0E"  # Пакет
+STICKER_START = "CAACAgIAAxkBAAEkJBVq6K-N3MVnqKBwEjhtDMCCGful5gACQ6YAAoJkQEtet_8phbM6Fj0E"  # Конверт
+STICKER_WAIT = "CAACAgIAAxkBAAEkJBlq6K-a13bIOw-fej19oPIs5zVWEwACUKoAAiOXQUtHcz2cFZj2RT0E"  # Котик
 
 
 # --- МАШИНА СОСТОЯНИЙ (FSM) ---
@@ -69,15 +73,11 @@ def get_catalog_menu():
     return builder.as_markup()
 
 
-# ОБНОВЛЕННАЯ ФУНКЦИЯ: кнопки мальчик/девочка только для детских
-def get_kids_category(back_to="catalog", category_type="kids"):
+def get_kids_category(back_to="catalog"):
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text="Все дизайны", callback_data="design_all"))
-
-    if category_type == "kids":
-        builder.row(InlineKeyboardButton(text="Для девочки", callback_data="design_girl"))
-        builder.row(InlineKeyboardButton(text="Для мальчика", callback_data="design_boy"))
-
+    builder.row(InlineKeyboardButton(text="Для девочки", callback_data="design_girl"))
+    builder.row(InlineKeyboardButton(text="Для мальчика", callback_data="design_boy"))
     builder.row(InlineKeyboardButton(text="🔙 Назад", callback_data=back_to))
     return builder.as_markup()
 
@@ -124,10 +124,12 @@ def get_prices_menu():
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
 
+    # Проверяем, есть ли текст после команды /start (из ссылки сайта)
     args = message.text.split(maxsplit=1)
 
     if len(args) > 1:
         username = message.from_user.username or "скрыт"
+        # Расшифровываем текст, который пришел из ссылки сайта
         clean_text = urllib.parse.unquote(args[1])
 
         await message.answer("✅ Спасибо! Ваша заявка с сайта получена. Анастасия свяжется с вами в ближайшее время.")
@@ -144,6 +146,10 @@ async def cmd_start(message: Message, state: FSMContext):
 
         await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
         return
+
+    # Если текста нет (обычный /start), показываем меню
+    # Отправляем стикер-конверт
+    await message.answer_sticker(STICKER_START)
 
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text="✨ Начать", callback_data="main_menu"))
@@ -176,13 +182,16 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     data = callback.data
 
     if data == "pay_sber":
+        # Отправляем стикер-котика перед просьбой об оплате
+        await callback.message.answer_sticker(STICKER_WAIT)
+
         await callback.message.edit_text(
             f"💳 **Оплата через СБП (Сбер)**\n\n"
             f"Сумма к оплате: **{DEPOSIT_AMOUNT} ₽**\n\n"
             f"📱 Номер для перевода: `{PHONE_NUMBER}`\n"
             f"(Сбербанк)\n\n"
             f"**Как перевести:**\n"
-            f"1. Откройте приложение вашего банка.\n"
+            f"1. Откройте приложение вашего банка (Сбер, Тинькофф, Альфа и т.д.).\n"
             f"2. Выберите «Перевод по номеру телефона» или «СБП».\n"
             f"3. Введите номер: `{PHONE_NUMBER}`\n"
             f"4. Укажите сумму: **{DEPOSIT_AMOUNT} ₽** и подтвердите.\n\n"
@@ -202,16 +211,13 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     elif data == "catalog":
         await callback.message.edit_text(text="📁 Каталог\n\nВыберите категорию:", reply_markup=get_catalog_menu())
 
-    # ОБНОВЛЕНО: передаем тип категории
     elif data in ["cat_kids", "cat_wedding", "cat_family"]:
         texts = {
             "cat_kids": "👶 Детские метрики\n\nВыберите дизайн:",
             "cat_wedding": "💒 Свадебные постеры\n\nВыберите дизайн:",
             "cat_family": "👨‍👩‍👧 Семейные постеры\n\nВыберите дизайн:"
         }
-        cat_type = "kids" if data == "cat_kids" else "other"
-        await callback.message.edit_text(text=texts[data],
-                                         reply_markup=get_kids_category(back_to="catalog", category_type=cat_type))
+        await callback.message.edit_text(text=texts[data], reply_markup=get_kids_category(back_to="catalog"))
 
     elif data.startswith("design_"):
         await callback.message.edit_text(text="📸 Классическая метрика\nот 1 290 ₽\n\nВыберите действие:",
@@ -236,27 +242,22 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     elif data == "gift":
         await callback.message.edit_text(text="🎁 Подобрать подарок\n\nВыберите повод:", reply_markup=get_gift_menu())
 
-    # ОБНОВЛЕНО: передаем тип категории для подарков
     elif data in ["gift_baby", "gift_birthday", "gift_wedding", "gift_family"]:
         if data in ["gift_baby", "gift_birthday"]:
             text = "👶 Детские метрики\n\nВыберите дизайн:"
-            cat_type = "kids"
         elif data == "gift_wedding":
             text = "💒 Свадебные постеры\n\nВыберите дизайн:"
-            cat_type = "other"
         else:
             text = "👨‍👩‍👧 Семейные постеры\n\nВыберите дизайн:"
-            cat_type = "other"
 
-        await callback.message.edit_text(text=text,
-                                         reply_markup=get_kids_category(back_to="gift", category_type=cat_type))
+        await callback.message.edit_text(text=text, reply_markup=get_kids_category(back_to="gift"))
 
     elif data == "custom":
         await state.set_state(OrderState.waiting_for_custom_text)
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text="🔙 Отменить и в меню", callback_data="main_menu"))
         await callback.message.edit_text(
-            text="✏️ Индивидуальный заказ\n\nОпишите вашу идею. Я передам это Анастасии, и она свяжется с вами!",
+            text="✏️ Индивидуальный заказ\n\nОпишите вашу идею (что бы вы хотели видеть на постере, какие цвета, пожелания). Я передам это Анастасии, и она свяжется с вами!",
             reply_markup=builder.as_markup()
         )
 
@@ -302,6 +303,9 @@ async def text_handler(message: Message, state: FSMContext):
 
     elif current_state == OrderState.waiting_for_details.state:
         await state.update_data(order_text=message.text, username=message.from_user.username or "скрыт")
+
+        # Отправляем стикер-пакет после того, как клиент прислал детали
+        await message.answer_sticker(STICKER_ORDER)
 
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text="💳 Оплатить через СБП (Сбер)", callback_data="pay_sber"))
@@ -353,6 +357,7 @@ async def text_handler(message: Message, state: FSMContext):
         await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
 
     else:
+        # ЛОВУШКА ДЛЯ ЛЮБЫХ ТЕКСТОВ (вдруг клиент написал вручную)
         username = message.from_user.username or "скрыт"
         clean_text = urllib.parse.unquote(message.text).replace('*', '')
 
@@ -371,30 +376,13 @@ async def text_handler(message: Message, state: FSMContext):
         await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
 
 
-# --- НАСТРОЙКИ ДЛЯ RENDER (ВЕБХУКИ) ---
-RENDER_EXTERNAL_URL = os.getenv("RENDER_EXTERNAL_URL")
-WEBHOOK_PATH = "/webhook"
-WEBHOOK_SECRET = "my-secret-token"
-
-
-def main():
-    app = web.Application()
-    setup_application(app, dp, bot=bot)
-
-    webhook_requests_handler = SimpleRequestHandler(
-        dispatcher=dp,
-        bot=bot,
-        secret_token=WEBHOOK_SECRET,
-    )
-    webhook_requests_handler.register(app, path=WEBHOOK_PATH)
-
-    async def healthcheck(request):
-        return web.Response(text="OK")
-
-    app.router.add_get("/", healthcheck)
-
-    web.run_app(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
+async def main():
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        logger.info("Бот остановлен.")
