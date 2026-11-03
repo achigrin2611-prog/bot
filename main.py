@@ -7,7 +7,7 @@ from aiohttp import web
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -23,11 +23,10 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- ID КАРТИНОК (ТОЛЬКО ИЗ ЛОГОВ ТВОЕГО БОТА) ---
-PHOTO_PRICES = "AgACAgIAAxkBAAIB72rp9kXATzZaKW2Z_2zQ75UPl1MwAAKsImsb-mtQSw3JjMm4OnifAQADAgADeQADPQQ"
+# --- ID КАРТИНОК (ТОЛЬКО ДЛЯ МЕТРИК) ---
 PHOTO_KIDS_1 = "AgACAgIAAxkBAAIBmGrp8AtEHNcbDVxw0nnCAAHU675X-gAClyBrG_8HUUs6jrIwrwbNNgEAAwIAA3kAAz0E"
 PHOTO_KIDS_2 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
-PHOTO_KIDS_3 = "AgACAgIAAxkBAAIBl2rp7_1Ix8L4cacnYJNniGe0qgZ7AAKeIGsb_wdRS9YmPc1rG34dAQADAgADeQADPQQ"
+PHOTO_KIDS_3 = "AgACAgIAAxkBAAIB72rp9kXATzZaKW2Z_2zQ75UPl1MwAAKsImsb-mtQSw3JjMm4OnifAQADAgADeQADPQQ"
 
 
 # --- МАШИНА СОСТОЯНИЙ (FSM) ---
@@ -232,7 +231,14 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text(text="💰 Цены и доставка\n\nИнформация:", reply_markup=get_prices_menu())
 
     elif data == "prices_list":
-        await callback.message.answer_photo(PHOTO_PRICES, caption="Актуальные цены:")
+        # ОТПРАВЛЯЕМ КАРТИНКУ С КОМПЬЮТЕРА
+        try:
+            photo = FSInputFile("price.jpg")
+            await callback.message.answer_photo(photo, caption="Актуальные цены:")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке прайса: {e}")
+            await callback.message.answer("Не удалось загрузить картинку с ценами. Пожалуйста, напишите нам.")
+
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text="🔙 Назад к ценам", callback_data="prices"))
         await callback.message.answer("Выберите действие:", reply_markup=builder.as_markup())
