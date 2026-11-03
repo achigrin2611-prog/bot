@@ -3,6 +3,7 @@ import logging
 import asyncio
 import urllib.parse
 from dotenv import load_dotenv
+from aiohttp import web
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -22,34 +23,27 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- НАСТРОЙКИ ОПЛАТЫ (СБЕР) ---
-PHONE_NUMBER = "+79066905758"
-DEPOSIT_AMOUNT = 645
-ANASTASIYA_ID = 5745114091
-
-# --- СТИКЕРЫ БРЕНДА ---
-STICKER_ORDER = "CAACAgIAAxkBAAEkJA9q6K9zeCfsHMxZ2HgfedUU1iLhGAACOqgAApuXSUvuFe6M-xon9D0E"  # Пакет
-STICKER_START = "CAACAgIAAxkBAAEkJBVq6K-N3MVnqKBwEjhtDMCCGful5gACQ6YAAoJkQEtet_8phbM6Fj0E"  # Конверт
-STICKER_WAIT = "CAACAgIAAxkBAAEkJBlq6K-a13bIOw-fej19oPIs5zVWEwACUKoAAiOXQUtHcz2cFZj2RT0E"  # Котик
+# --- ID КАРТИНОК (ЗАМЕНИ НА СВОИ) ---
+PHOTO_PRICES = "AgACAgIAAxkBAAEkLbZq6exb4wQPxRwB7PQg6kDJ3RomBgACRCprG0PhSUtCEnatwlenmgEAAwIAA3kAAz0E"
+PHOTO_KIDS_1 = "AgACAgIAAxkBAAEkLbpq6e0RLHuOUNc2PFduCJxqEe0kTgAClyBrG_8HUUu0LHvuVFmqawEAAwIAA3kAAz0E"
+PHOTO_KIDS_2 = "AgACAgIAAxkBAAEkLbxq6e0rghdMdlt5gPX7KzxMw_O29QACnCBrG_8HUUsKT79JrHjVegEAAwIAA3kAAz0E"
+PHOTO_KIDS_3 = "AgACAgIAAxkBAAEkLb5q6e0-7IBwt_82MDUtcbYFvh244QACniBrG_8HUUvdvUMtZBlqJQEAAwIAA3kAAz0E"
 
 
 # --- МАШИНА СОСТОЯНИЙ (FSM) ---
 class OrderState(StatesGroup):
     waiting_for_photo = State()
     waiting_for_details = State()
-    choosing_payment = State()
-    waiting_for_receipt = State()
     waiting_for_custom_text = State()
 
 
 # --- КЛАВИАТУРЫ ---
 def get_reply_keyboard():
-    builder = ReplyKeyboardMarkup(
+    return ReplyKeyboardMarkup(
         keyboard=[[KeyboardButton(text="🏠 Главное меню")]],
         resize_keyboard=True,
         input_field_placeholder="Выберите действие или напишите нам..."
     )
-    return builder
 
 
 def get_main_menu():
@@ -75,24 +69,39 @@ def get_catalog_menu():
 
 def get_kids_category(back_to="catalog"):
     builder = InlineKeyboardBuilder()
-    builder.row(InlineKeyboardButton(text="Все дизайны", callback_data="design_all"))
+    builder.row(InlineKeyboardButton(text="Все дизайны", callback_data="design_all_kids"))
     builder.row(InlineKeyboardButton(text="Для девочки", callback_data="design_girl"))
     builder.row(InlineKeyboardButton(text="Для мальчика", callback_data="design_boy"))
     builder.row(InlineKeyboardButton(text="🔙 Назад", callback_data=back_to))
     return builder.as_markup()
 
 
-def get_product_card():
+def get_general_category(back_to="catalog"):
     builder = InlineKeyboardBuilder()
-    builder.row(InlineKeyboardButton(text="✅ Заказать этот постер", callback_data="order"))
+    builder.row(InlineKeyboardButton(text="Посмотреть примеры", callback_data="design_all_general"))
+    builder.row(InlineKeyboardButton(text="🔙 Назад", callback_data=back_to))
+    return builder.as_markup()
+
+
+def get_product_card(category="kids"):
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(text="✅ Заказать этот постер", callback_data=f"order_{category}"))
     builder.row(InlineKeyboardButton(text="🔙 Назад к каталогу", callback_data="catalog"))
     return builder.as_markup()
 
 
-def get_order_menu():
+def get_order_menu(category="kids"):
     builder = InlineKeyboardBuilder()
-    builder.row(InlineKeyboardButton(text="📸 Классическая метрика (София)", callback_data="order_classic"))
-    builder.row(InlineKeyboardButton(text="🎨 Другой дизайн из каталога", callback_data="order_catalog"))
+    if category == "kids":
+        builder.row(InlineKeyboardButton(text="📸 Классическая метрика (Коллаж)", callback_data="order_classic"))
+        builder.row(InlineKeyboardButton(text="🖼 Портрет с текстом", callback_data="order_portrait"))
+    elif category == "wedding":
+        builder.row(InlineKeyboardButton(text="💒 Свадебный коллаж", callback_data="order_wed_collage"))
+        builder.row(InlineKeyboardButton(text="📅 Постер с датой", callback_data="order_wed_date"))
+    elif category == "family":
+        builder.row(InlineKeyboardButton(text="👨‍👩‍👧 Семейный коллаж", callback_data="order_fam_collage"))
+        builder.row(InlineKeyboardButton(text="🖼 Портрет с текстом", callback_data="order_fam_portrait"))
+
     builder.row(InlineKeyboardButton(text="✏️ Свой вариант", callback_data="order_custom"))
     builder.row(InlineKeyboardButton(text="🔙 Отменить и в меню", callback_data="main_menu"))
     return builder.as_markup()
@@ -114,145 +123,100 @@ def get_prices_menu():
     builder.row(InlineKeyboardButton(text="📐 Размеры", callback_data="formats"))
     builder.row(InlineKeyboardButton(text="⏰ Сроки изготовления", callback_data="terms"))
     builder.row(InlineKeyboardButton(text="🚚 Доставка", callback_data="delivery"))
-    builder.row(InlineKeyboardButton(text="💳 Способы оплаты", callback_data="payment"))
     builder.row(InlineKeyboardButton(text="🔙 Назад в меню", callback_data="main_menu"))
     return builder.as_markup()
 
 
-# --- ОБРАБОТЧИКИ КОМАНД ---
+# --- ОБРАБОТЧИКИ ---
 @dp.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
-
-    # Проверяем, есть ли текст после команды /start (из ссылки сайта)
     args = message.text.split(maxsplit=1)
-
     if len(args) > 1:
         username = message.from_user.username or "скрыт"
-        # Расшифровываем текст, который пришел из ссылки сайта
         clean_text = urllib.parse.unquote(args[1])
-
         await message.answer("✅ Спасибо! Ваша заявка с сайта получена. Анастасия свяжется с вами в ближайшее время.")
-
         try:
-            await bot.send_message(
-                ANASTASIYA_ID,
-                f"📩 **Новая заявка (с сайта)!**\n\n"
-                f"От: @{username} (ID: {message.from_user.id})\n\n"
-                f"{clean_text}"
-            )
+            await bot.send_message(ADMIN_ID,
+                                   f"📩 **Новая заявка (с сайта)!**\n\nОт: @{username} (ID: {message.from_user.id})\n\n{clean_text}")
         except Exception as e:
             logger.error(f"Ошибка при отправке заявки с сайта: {e}")
-
         await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
         return
 
-    # Если текста нет (обычный /start), показываем меню
-    # Отправляем стикер-конверт
-    await message.answer_sticker(STICKER_START)
-
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text="✨ Начать", callback_data="main_menu"))
-
     await message.answer(
-        "Привет! 👋\n\n"
-        "Добро пожаловать в Lelayti!\n\n"
-        "Мы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\n"
-        "Нажмите кнопку ниже, чтобы начать:",
+        "Привет! 👋\n\nДобро пожаловать в Lelayti!\n\nМы создаём персонализированные постеры, которые сохранят ваши самые важные моменты.\n\nНажмите кнопку ниже, чтобы начать:",
         reply_markup=builder.as_markup()
     )
-    await message.answer(
-        "Используйте кнопку ниже, чтобы в любой момент вернуться в меню 👇",
-        reply_markup=get_reply_keyboard()
-    )
+    await message.answer("Используйте кнопку ниже, чтобы в любой момент вернуться в меню 👇",
+                         reply_markup=get_reply_keyboard())
 
 
 @dp.message(lambda message: message.text == "🏠 Главное меню")
 async def back_to_main_from_reply(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer(
-        "Вы вернулись в главное меню. Выберите действие:",
-        reply_markup=get_main_menu()
-    )
+    await message.answer("Вы вернулись в главное меню. Выберите действие:", reply_markup=get_main_menu())
 
 
-# --- ЕДИНЫЙ ОБРАБОТЧИК ИНЛАЙН-КНОПОК ---
 @dp.callback_query()
 async def callback_handler(callback: CallbackQuery, state: FSMContext):
     data = callback.data
 
-    if data == "pay_sber":
-        # Отправляем стикер-котика перед просьбой об оплате
-        await callback.message.answer_sticker(STICKER_WAIT)
-
-        await callback.message.edit_text(
-            f"💳 **Оплата через СБП (Сбер)**\n\n"
-            f"Сумма к оплате: **{DEPOSIT_AMOUNT} ₽**\n\n"
-            f"📱 Номер для перевода: `{PHONE_NUMBER}`\n"
-            f"(Сбербанк)\n\n"
-            f"**Как перевести:**\n"
-            f"1. Откройте приложение вашего банка (Сбер, Тинькофф, Альфа и т.д.).\n"
-            f"2. Выберите «Перевод по номеру телефона» или «СБП».\n"
-            f"3. Введите номер: `{PHONE_NUMBER}`\n"
-            f"4. Укажите сумму: **{DEPOSIT_AMOUNT} ₽** и подтвердите.\n\n"
-            f"После перевода **отправьте скриншот чека сюда** в чат.",
-            parse_mode="Markdown"
-        )
-        await state.set_state(OrderState.waiting_for_receipt)
-        await callback.answer()
-        return
-
     if data == "main_menu":
         await state.clear()
-        await callback.message.edit_text(
-            text="Привет! 👋\n\nВыберите, что вас интересует:",
-            reply_markup=get_main_menu()
-        )
+        await callback.message.edit_text(text="Привет! 👋\n\nВыберите, что вас интересует:",
+                                         reply_markup=get_main_menu())
+
     elif data == "catalog":
         await callback.message.edit_text(text="📁 Каталог\n\nВыберите категорию:", reply_markup=get_catalog_menu())
 
-    elif data in ["cat_kids", "cat_wedding", "cat_family"]:
-        texts = {
-            "cat_kids": "👶 Детские метрики\n\nВыберите дизайн:",
-            "cat_wedding": "💒 Свадебные постеры\n\nВыберите дизайн:",
-            "cat_family": "👨‍👩‍👧 Семейные постеры\n\nВыберите дизайн:"
-        }
-        await callback.message.edit_text(text=texts[data], reply_markup=get_kids_category(back_to="catalog"))
+    elif data == "cat_kids":
+        await callback.message.edit_text(text="👶 Детские метрики\n\nВыберите дизайн:",
+                                         reply_markup=get_kids_category(back_to="catalog"))
+    elif data == "cat_wedding":
+        await callback.message.edit_text(text="💒 Свадебные постеры\n\nВыберите дизайн:",
+                                         reply_markup=get_general_category(back_to="catalog"))
+    elif data == "cat_family":
+        await callback.message.edit_text(text="👨‍👩‍👧 Семейные постеры\n\nВыберите дизайн:",
+                                         reply_markup=get_general_category(back_to="catalog"))
 
+    # --- ПРИМЕРЫ РАБОТ (ФОТО) ---
     elif data.startswith("design_"):
-        await callback.message.edit_text(text="📸 Классическая метрика\nот 1 290 ₽\n\nВыберите действие:",
-                                         reply_markup=get_product_card())
+        if "kids" in data or "girl" in data or "boy" in data:
+            await callback.message.answer_photo(PHOTO_KIDS_1, caption="📸 Пример: Коллаж")
+            await callback.message.answer_photo(PHOTO_KIDS_2, caption="🖼 Пример: Портрет с текстом")
+            await callback.message.answer_photo(PHOTO_KIDS_3, caption="📸 Пример: Коллаж на голубом фоне")
+            await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
+                                          reply_markup=get_product_card("kids"))
+        else:
+            await callback.message.answer(
+                text="📸 Здесь скоро появятся примеры наших работ.\n\nВы можете заказать постер:",
+                reply_markup=get_product_card("wedding" if "wed" in data else "family"))
 
-    elif data == "order":
-        await callback.message.edit_text(
-            text="📝 Оформление заказа\n\n1/5\nКакой постер вы хотите заказать?",
-            reply_markup=get_order_menu()
-        )
+    # --- ОФОРМЛЕНИЕ ЗАКАЗА ---
     elif data.startswith("order_"):
-        await state.set_state(OrderState.waiting_for_photo)
+        category = data.split("_")[1]
+        if category in ["classic", "portrait", "collage", "date"]:
+            category = "kids"
 
+        await callback.message.edit_text(
+            text="📝 Оформление заказа\n\n1/4\nКакой постер вы хотите заказать?",
+            reply_markup=get_order_menu(category)
+        )
+
+    elif data.startswith("order_classic") or data.startswith("order_portrait") or data.startswith(
+            "order_wed") or data.startswith("order_fam"):
+        await state.set_state(OrderState.waiting_for_photo)
         cancel_builder = InlineKeyboardBuilder()
         cancel_builder.row(InlineKeyboardButton(text="🔙 Отменить заказ", callback_data="main_menu"))
-
         await callback.message.edit_text(
-            text="📝 Оформление заказа\n\n2/5\nПрикрепите фото:",
+            text="📝 Оформление заказа\n\n2/4\nПрикрепите фото (или несколько):",
             reply_markup=cancel_builder.as_markup()
         )
 
-    elif data == "gift":
-        await callback.message.edit_text(text="🎁 Подобрать подарок\n\nВыберите повод:", reply_markup=get_gift_menu())
-
-    elif data in ["gift_baby", "gift_birthday", "gift_wedding", "gift_family"]:
-        if data in ["gift_baby", "gift_birthday"]:
-            text = "👶 Детские метрики\n\nВыберите дизайн:"
-        elif data == "gift_wedding":
-            text = "💒 Свадебные постеры\n\nВыберите дизайн:"
-        else:
-            text = "👨‍👩‍👧 Семейные постеры\n\nВыберите дизайн:"
-
-        await callback.message.edit_text(text=text, reply_markup=get_kids_category(back_to="gift"))
-
-    elif data == "custom":
+    elif data == "order_custom":
         await state.set_state(OrderState.waiting_for_custom_text)
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text="🔙 Отменить и в меню", callback_data="main_menu"))
@@ -261,19 +225,43 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
             reply_markup=builder.as_markup()
         )
 
+    # --- ПОДАРКИ ---
+    elif data == "gift":
+        await callback.message.edit_text(text="🎁 Подобрать подарок\n\nВыберите повод:", reply_markup=get_gift_menu())
+    elif data in ["gift_baby", "gift_birthday"]:
+        await callback.message.edit_text(text="👶 Детские метрики\n\nВыберите дизайн:",
+                                         reply_markup=get_kids_category(back_to="gift"))
+    elif data in ["gift_wedding", "gift_family"]:
+        await callback.message.edit_text(text="🖼 Выберите дизайн:", reply_markup=get_general_category(back_to="gift"))
+
+    # --- ЦЕНЫ И ДОСТАВКА ---
     elif data == "prices":
         await callback.message.edit_text(text="💰 Цены и доставка\n\nИнформация:", reply_markup=get_prices_menu())
-    elif data in ["prices_list", "formats", "terms", "delivery", "payment"]:
-        info_texts = {
-            "prices_list": "💰 Цены:\nКлассическая — от 1290 ₽\nАрт — от 1290 ₽\nС фото — от 1490 ₽",
-            "formats": "📐 Доступные размеры:\nA4 (210×297 мм)\nA3 (297×420 мм)",
-            "terms": "⏰ Сроки: 1–3 дня",
-            "delivery": "🚚 Доставка: электронно или печать 2–5 дней",
-            "payment": "💳 Оплата: СБП по номеру (Сбер)"
-        }
+
+    elif data == "prices_list":
+        await callback.message.answer_photo(PHOTO_PRICES, caption="Актуальные цены:")
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text="🔙 Назад к ценам", callback_data="prices"))
-        await callback.message.edit_text(text=info_texts[data], reply_markup=builder.as_markup())
+        await callback.message.answer("Выберите действие:", reply_markup=builder.as_markup())
+
+    elif data == "terms":
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(text="🔙 Назад к ценам", callback_data="prices"))
+        await callback.message.edit_text(
+            text="⏰ **Сроки изготовления:**\n\n• Электронный формат: 1-2 дня\n• Печатный формат: 1-3 дня + доставка",
+            reply_markup=builder.as_markup(), parse_mode="Markdown")
+
+    elif data == "delivery":
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(text="🔙 Назад к ценам", callback_data="prices"))
+        await callback.message.edit_text(
+            text="🚚 **Доставка**\n\nМы отправляем заказы удобным для вас способом — вы можете выбрать любого подходящего оператора доставки.\n\nСтоимость доставки оплачивается получателем отдельно и рассчитывается согласно тарифам выбранной службы доставки.\n\nСроки и условия доставки зависят от выбранного оператора и направления отправления.",
+            reply_markup=builder.as_markup(), parse_mode="Markdown")
+
+    elif data == "formats":
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(text="🔙 Назад к ценам", callback_data="prices"))
+        await callback.message.edit_text(text="📐 Доступные размеры:\nA4 (210×297 мм)", reply_markup=builder.as_markup())
 
     elif data == "contact":
         builder = InlineKeyboardBuilder()
@@ -291,11 +279,9 @@ async def text_handler(message: Message, state: FSMContext):
     if current_state == OrderState.waiting_for_photo.state:
         if message.photo:
             await state.update_data(user_photo=message.photo[-1].file_id)
-
             builder = InlineKeyboardBuilder()
             builder.row(InlineKeyboardButton(text="🔙 Отменить заказ", callback_data="main_menu"))
-
-            await message.answer("📸 Фото сохранено.\n\n3/5\nНапишите пожелания (текст, цвета):",
+            await message.answer("📸 Фото сохранено.\n\n3/4\nНапишите пожелания (текст, цвета, имена и т.д.):",
                                  reply_markup=builder.as_markup())
             await state.set_state(OrderState.waiting_for_details)
         else:
@@ -304,80 +290,63 @@ async def text_handler(message: Message, state: FSMContext):
     elif current_state == OrderState.waiting_for_details.state:
         await state.update_data(order_text=message.text, username=message.from_user.username or "скрыт")
 
-        # Отправляем стикер-пакет после того, как клиент прислал детали
-        await message.answer_sticker(STICKER_ORDER)
-
-        builder = InlineKeyboardBuilder()
-        builder.row(InlineKeyboardButton(text="💳 Оплатить через СБП (Сбер)", callback_data="pay_sber"))
-        builder.row(InlineKeyboardButton(text="🔙 Отменить заказ", callback_data="main_menu"))
-
+        user_data = await state.get_data()
         await message.answer(
-            f"✅ Детали приняты!\nОсталась предоплата {DEPOSIT_AMOUNT} ₽.\nНажмите кнопку ниже:",
-            reply_markup=builder.as_markup()
-        )
-        await state.set_state(OrderState.choosing_payment)
-
-    elif current_state == OrderState.choosing_payment.state:
-        await message.answer("Нажмите на кнопку выше 👆")
-
-    elif current_state == OrderState.waiting_for_receipt.state:
-        if message.photo:
-            user_data = await state.get_data()
-            await message.answer(
-                "✅ Скриншот получен! Передала Анастасии. Как только оплата подтвердится, я напишу вам!")
-            try:
-                await bot.send_message(ANASTASIYA_ID,
-                                       f"🔥 **Заказ (Сбер)**\nОт: @{user_data.get('username')}\nПожелания: {user_data.get('order_text')}")
-                if user_data.get('user_photo'):
-                    await bot.send_photo(ANASTASIYA_ID, photo=user_data.get('user_photo'), caption="Фото к заказу")
-                await bot.send_photo(ANASTASIYA_ID, photo=message.photo[-1].file_id, caption="🧾 Скриншот оплаты")
-            except Exception as e:
-                logger.error(f"Ошибка: {e}")
-            await state.clear()
-
-            await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
-        else:
-            await message.answer("Отправьте скриншот чека.")
-
-    elif current_state == OrderState.waiting_for_custom_text.state:
-        username = message.from_user.username or "скрыт"
-        await message.answer("✅ Спасибо! Я передала вашу идею Анастасии. Она свяжется с вами в ближайшее время.")
+            "✅ Детали приняты!\n\nАнастасия свяжется с вами в ближайшее время для обсуждения деталей и оплаты.")
 
         try:
-            await bot.send_message(
-                ANASTASIYA_ID,
-                f"✏️ **Новый индивидуальный заказ!**\n\n"
-                f"От: @{username} (ID: {message.from_user.id})\n\n"
-                f"Идея клиента:\n{message.text}"
-            )
+            await bot.send_message(ADMIN_ID,
+                                   f"🔥 **Новый заказ!**\nОт: @{user_data.get('username')}\nПожелания: {user_data.get('order_text')}")
+            if user_data.get('user_photo'):
+                await bot.send_photo(ADMIN_ID, photo=user_data.get('user_photo'), caption="Фото к заказу")
         except Exception as e:
-            logger.error(f"Ошибка при отправке индивидуального заказа: {e}")
+            logger.error(f"Ошибка: {e}")
 
         await state.clear()
         await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
 
+    elif current_state == OrderState.waiting_for_custom_text.state:
+        username = message.from_user.username or "скрыт"
+        await message.answer("✅ Спасибо! Я передала вашу идею Анастасии. Она свяжется с вами в ближайшее время.")
+        try:
+            await bot.send_message(ADMIN_ID,
+                                   f"✏️ **Новый индивидуальный заказ!**\n\nОт: @{username} (ID: {message.from_user.id})\n\nИдея клиента:\n{message.text}")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке индивидуального заказа: {e}")
+        await state.clear()
+        await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
+
     else:
-        # ЛОВУШКА ДЛЯ ЛЮБЫХ ТЕКСТОВ (вдруг клиент написал вручную)
         username = message.from_user.username or "скрыт"
         clean_text = urllib.parse.unquote(message.text).replace('*', '')
-
         await message.answer("✅ Спасибо! Ваша заявка принята. Анастасия свяжется с вами в ближайшее время.")
-
         try:
-            await bot.send_message(
-                ANASTASIYA_ID,
-                f"📩 **Новая заявка (из бота)!**\n\n"
-                f"От: @{username} (ID: {message.from_user.id})\n\n"
-                f"Текст сообщения:\n{clean_text}"
-            )
+            await bot.send_message(ADMIN_ID,
+                                   f"📩 **Новая заявка (из бота)!**\n\nОт: @{username} (ID: {message.from_user.id})\n\nТекст сообщения:\n{clean_text}")
         except Exception as e:
             logger.error(f"Ошибка при отправке заявки: {e}")
-
         await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
+
+
+# --- ВЕБ-СЕРВЕР ДЛЯ RENDER ---
+async def handle_ping(request):
+    return web.Response(text="Bot is running!")
+
+
+async def start_web_server():
+    app = web.Application()
+    app.router.add_get('/', handle_ping)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", 10000))
+    site = web.TCPSite(runner, '0.0.0.0', port)
+    await site.start()
+    logger.info(f"Веб-сервер запущен на порту {port}")
 
 
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
+    await start_web_server()
     await dp.start_polling(bot)
 
 
