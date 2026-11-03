@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- ID КАРТИНОК (ТОЛЬКО ДЛЯ МЕТРИК) ---
+# --- ID КАРТИНОК ДЛЯ МЕТРИК ---
 PHOTO_KIDS_1 = "AgACAgIAAxkBAAIBmGrp8AtEHNcbDVxw0nnCAAHU675X-gAClyBrG_8HUUs6jrIwrwbNNgEAAwIAA3kAAz0E"
 PHOTO_KIDS_2 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
 PHOTO_KIDS_3 = "AgACAgIAAxkBAAIB72rp9kXATzZaKW2Z_2zQ75UPl1MwAAKsImsb-mtQSw3JjMm4OnifAQADAgADeQADPQQ"
@@ -210,6 +210,17 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
             reply_markup=cancel_builder.as_markup()
         )
 
+    # --- ИНДИВИДУАЛЬНЫЙ ЗАКАЗ (ВОЗВРАЩЕНО) ---
+    elif data == "custom":
+        await state.set_state(OrderState.waiting_for_custom_text)
+        builder = InlineKeyboardBuilder()
+        builder.row(InlineKeyboardButton(text="🔙 Отменить и в меню", callback_data="main_menu"))
+        await callback.message.edit_text(
+            text="✏️ Индивидуальный заказ\n\nОпишите вашу идею (что бы вы хотели видеть на постере, какие цвета, пожелания). Я передам это Анастасии, и она свяжется с вами!",
+            reply_markup=builder.as_markup()
+        )
+    # ------------------------------------------
+
     elif data == "order_custom":
         await state.set_state(OrderState.waiting_for_custom_text)
         builder = InlineKeyboardBuilder()
@@ -231,7 +242,6 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
         await callback.message.edit_text(text="💰 Цены и доставка\n\nИнформация:", reply_markup=get_prices_menu())
 
     elif data == "prices_list":
-        # ОТПРАВЛЯЕМ КАРТИНКУ С КОМПЬЮТЕРА
         try:
             photo = FSInputFile("price.jpg")
             await callback.message.answer_photo(photo, caption="Актуальные цены:")
