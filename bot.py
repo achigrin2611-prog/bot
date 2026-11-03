@@ -27,14 +27,17 @@ dp = Dispatcher()
 PHOTO_PRICES = "AgACAgIAAxkBAAIBl2rp7_1Ix8L4cacnYJNniGe0qgZ7AAKeIGsb_wdRS9YmPc1rG34dAQADAgADeQADPQQ"
 PHOTO_KIDS_1 = "AgACAgIAAxkBAAIBmGrp8AtEHNcbDVxw0nnCAAHU675X-gAClyBrG_8HUUs6jrIwrwbNNgEAAwIAA3kAAz0E"
 PHOTO_KIDS_2 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
+PHOTO_KIDS_3 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
 
 
+# --- МАШИНА СОСТОЯНИЙ (FSM) ---
 class OrderState(StatesGroup):
     waiting_for_photo = State()
     waiting_for_details = State()
     waiting_for_custom_text = State()
 
 
+# --- КЛАВИАТУРЫ ---
 def get_reply_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[[KeyboardButton(text="🏠 Главное меню")]],
@@ -123,6 +126,7 @@ def get_prices_menu():
     return builder.as_markup()
 
 
+# --- ОБРАБОТЧИКИ ---
 @dp.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
@@ -181,6 +185,7 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
         if "kids" in data or "girl" in data or "boy" in data:
             await callback.message.answer_photo(PHOTO_KIDS_1, caption="📸 Пример: Коллаж")
             await callback.message.answer_photo(PHOTO_KIDS_2, caption="🖼 Пример: Портрет с текстом")
+            await callback.message.answer_photo(PHOTO_KIDS_3, caption="📸 Пример: Коллаж на голубом фоне")
             await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
                                           reply_markup=get_product_card("kids"))
         else:
@@ -254,8 +259,14 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
+# --- ОБРАБОТЧИК ТЕКСТА И ФОТО (FSM) ---
 @dp.message()
 async def text_handler(message: Message, state: FSMContext):
+    # --- ВРЕМЕННЫЙ КОД ДЛЯ ПОЛУЧЕНИЯ ID (УБРАТЬ ПОСЛЕ ИСПОЛЬЗОВАНИЯ) ---
+    if message.photo:
+        logger.info(f"=== ВАШ FILE_ID: {message.photo[-1].file_id} ===")
+    # ----------------------------------------------------------------------
+
     current_state = await state.get_state()
 
     if current_state == OrderState.waiting_for_photo.state:
@@ -304,26 +315,20 @@ async def text_handler(message: Message, state: FSMContext):
             await message.answer("Пожалуйста, опишите вашу идею текстом.")
 
     else:
-        # Ловушка для любых сообщений, которые не подошли под условия
         username = message.from_user.username or "скрыт"
         text_to_send = message.text or message.caption or "Без текста"
         clean_text = urllib.parse.unquote(text_to_send).replace('*', '')
 
-        # НЕ отправляем заявку, если это картинка. Просто игнорируем или отвечаем.
-        if message.photo:
-            await message.answer(
-                "📸 Я получил вашу картинку, но она не относится к текущему заказу. Пожалуйста, нажмите «🏠 Главное меню» и начните оформление заново.")
-        else:
-            await message.answer("✅ Спасибо! Ваша заявка принята. Анастасия свяжется с вами в ближайшее время.")
-            try:
-                await bot.send_message(ADMIN_ID,
-                                       f"📩 **Новая заявка (из бота)!**\n\nОт: @{username} (ID: {message.from_user.id})\n\nТекст сообщения:\n{clean_text}")
-            except Exception as e:
-                logger.error(f"Ошибка при отправке заявки: {e}")
-            await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
+        await message.answer("✅ Спасибо! Ваша заявка принята. Анастасия свяжется с вами в ближайшее время.")
+        try:
+            await bot.send_message(ADMIN_ID,
+                                   f"📩 **Новая заявка (из бота)!**\n\nОт: @{username} (ID: {message.from_user.id})\n\nТекст сообщения:\n{clean_text}")
+        except Exception as e:
+            logger.error(f"Ошибка при отправке заявки: {e}")
+        await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
 
 
-# --- ВЕБ-СЕРВЕР ---
+# --- ВЕБ-СЕРВЕР ДЛЯ RENDER ---
 async def handle_ping(request):
     return web.Response(text="Bot is running!")
 
