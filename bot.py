@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- ID КАРТИНОК (пока оставляем старые, заменим после получения новых) ---
-PHOTO_PRICES = "AgACAgIAAxkBAAEkLbZq6exb4wQPxRwB7PQg6kDJ3RomBgACRCprG0PhSUtCEnatwlenmgEAAwIAA3kAAz0E"
-PHOTO_KIDS_1 = "AgACAgIAAxkBAAEkLbpq6e0RLHuOUNc2PFduCJxqEe0kTgAClyBrG_8HUUu0LHvuVFmqawEAAwIAA3kAAz0E"
-PHOTO_KIDS_2 = "AgACAgIAAxkBAAEkLbxq6e0rghdMdlt5gPX7KzxMw_O29QACnCBrG_8HUUsKT79JrHjVegEAAwIAA3kAAz0E"
-PHOTO_KIDS_3 = "AgACAgIAAxkBAAEkLb5q6e0-7IBwt_82MDUtcbYFvh244QACniBrG_8HUUvdvUMtZBlqJQEAAwIAA3kAAz0E"
+# --- ID КАРТИНОК (ИЗ ЛОГОВ ТВОЕГО БОТА) ---
+PHOTO_PRICES = "AgACAgIAAxkBAAIBl2rp7_1Ix8L4cacnYJNniGe0qgZ7AAKeIGsb_wdRS9YmPc1rG34dAQADAgADeQADPQQ"
+PHOTO_KIDS_1 = "AgACAgIAAxkBAAIBmGrp8AtEHNcbDVxw0nnCAAHU675X-gAClyBrG_8HUUs6jrIwrwbNNgEAAwIAA3kAAz0E"
+PHOTO_KIDS_2 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
+PHOTO_KIDS_3 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
 
 
 # --- МАШИНА СОСТОЯНИЙ (FSM) ---
@@ -268,11 +268,6 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
 # --- ОБРАБОТЧИК ТЕКСТА И ФОТО (FSM) ---
 @dp.message()
 async def text_handler(message: Message, state: FSMContext):
-    # --- ВРЕМЕННЫЙ КОД ДЛЯ ПОЛУЧЕНИЯ ID (УБРАТЬ ПОСЛЕ ИСПОЛЬЗОВАНИЯ) ---
-    if message.photo:
-        logger.info(f"=== ВАШ FILE_ID: {message.photo[-1].file_id} ===")
-    # ----------------------------------------------------------------------
-
     current_state = await state.get_state()
 
     if current_state == OrderState.waiting_for_photo.state:
@@ -287,37 +282,44 @@ async def text_handler(message: Message, state: FSMContext):
             await message.answer("Пожалуйста, отправьте фото.")
 
     elif current_state == OrderState.waiting_for_details.state:
-        await state.update_data(order_text=message.text, username=message.from_user.username or "скрыт")
+        if message.text:
+            await state.update_data(order_text=message.text, username=message.from_user.username or "скрыт")
+            user_data = await state.get_data()
+            await message.answer(
+                "✅ Детали приняты!\n\nАнастасия свяжется с вами в ближайшее время для обсуждения деталей и оплаты.")
 
-        user_data = await state.get_data()
-        await message.answer(
-            "✅ Детали приняты!\n\nАнастасия свяжется с вами в ближайшее время для обсуждения деталей и оплаты.")
+            try:
+                await bot.send_message(ADMIN_ID,
+                                       f"🔥 **Новый заказ!**\nОт: @{user_data.get('username')}\nПожелания: {user_data.get('order_text')}")
+                if user_data.get('user_photo'):
+                    await bot.send_photo(ADMIN_ID, photo=user_data.get('user_photo'), caption="Фото к заказу")
+            except Exception as e:
+                logger.error(f"Ошибка: {e}")
 
-        try:
-            await bot.send_message(ADMIN_ID,
-                                   f"🔥 **Новый заказ!**\nОт: @{user_data.get('username')}\nПожелания: {user_data.get('order_text')}")
-            if user_data.get('user_photo'):
-                await bot.send_photo(ADMIN_ID, photo=user_data.get('user_photo'), caption="Фото к заказу")
-        except Exception as e:
-            logger.error(f"Ошибка: {e}")
-
-        await state.clear()
-        await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
+            await state.clear()
+            await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
+        else:
+            await message.answer("Пожалуйста, напишите пожелания текстом.")
 
     elif current_state == OrderState.waiting_for_custom_text.state:
-        username = message.from_user.username or "скрыт"
-        await message.answer("✅ Спасибо! Я передала вашу идею Анастасии. Она свяжется с вами в ближайшее время.")
-        try:
-            await bot.send_message(ADMIN_ID,
-                                   f"✏️ **Новый индивидуальный заказ!**\n\nОт: @{username} (ID: {message.from_user.id})\n\nИдея клиента:\n{message.text}")
-        except Exception as e:
-            logger.error(f"Ошибка при отправке индивидуального заказа: {e}")
-        await state.clear()
-        await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
+        if message.text:
+            username = message.from_user.username or "скрыт"
+            await message.answer("✅ Спасибо! Я передала вашу идею Анастасии. Она свяжется с вами в ближайшее время.")
+            try:
+                await bot.send_message(ADMIN_ID,
+                                       f"✏️ **Новый индивидуальный заказ!**\n\nОт: @{username} (ID: {message.from_user.id})\n\nИдея клиента:\n{message.text}")
+            except Exception as e:
+                logger.error(f"Ошибка при отправке индивидуального заказа: {e}")
+            await state.clear()
+            await message.answer("Чтобы вернуться в меню, используйте кнопку ниже 👇", reply_markup=get_reply_keyboard())
+        else:
+            await message.answer("Пожалуйста, опишите вашу идею текстом.")
 
     else:
         username = message.from_user.username or "скрыт"
-        clean_text = urllib.parse.unquote(message.text).replace('*', '')
+        text_to_send = message.text or message.caption or "Без текста"
+        clean_text = urllib.parse.unquote(text_to_send).replace('*', '')
+
         await message.answer("✅ Спасибо! Ваша заявка принята. Анастасия свяжется с вами в ближайшее время.")
         try:
             await bot.send_message(ADMIN_ID,
