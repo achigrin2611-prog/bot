@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- ID КАРТИНОК (ПРАВИЛЬНЫЕ) ---
+# --- ID КАРТИНОК (пока оставляем старые, заменим после получения новых) ---
 PHOTO_PRICES = "AgACAgIAAxkBAAEkLbZq6exb4wQPxRwB7PQg6kDJ3RomBgACRCprG0PhSUtCEnatwlenmgEAAwIAA3kAAz0E"
 PHOTO_KIDS_1 = "AgACAgIAAxkBAAEkLbpq6e0RLHuOUNc2PFduCJxqEe0kTgAClyBrG_8HUUu0LHvuVFmqawEAAwIAA3kAAz0E"
 PHOTO_KIDS_2 = "AgACAgIAAxkBAAEkLbxq6e0rghdMdlt5gPX7KzxMw_O29QACnCBrG_8HUUsKT79JrHjVegEAAwIAA3kAAz0E"
@@ -120,7 +120,6 @@ def get_gift_menu():
 def get_prices_menu():
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text="💰 Цены на постеры", callback_data="prices_list"))
-    # Кнопка "Размеры" убрана
     builder.row(InlineKeyboardButton(text="⏰ Сроки изготовления", callback_data="terms"))
     builder.row(InlineKeyboardButton(text="🚚 Доставка", callback_data="delivery"))
     builder.row(InlineKeyboardButton(text="🔙 Назад в меню", callback_data="main_menu"))
@@ -269,6 +268,11 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
 # --- ОБРАБОТЧИК ТЕКСТА И ФОТО (FSM) ---
 @dp.message()
 async def text_handler(message: Message, state: FSMContext):
+    # --- ВРЕМЕННЫЙ КОД ДЛЯ ПОЛУЧЕНИЯ ID (УБРАТЬ ПОСЛЕ ИСПОЛЬЗОВАНИЯ) ---
+    if message.photo:
+        logger.info(f"=== ВАШ FILE_ID: {message.photo[-1].file_id} ===")
+    # ----------------------------------------------------------------------
+
     current_state = await state.get_state()
 
     if current_state == OrderState.waiting_for_photo.state:
