@@ -190,16 +190,14 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
             await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
                                           reply_markup=get_product_card("kids"))
         else:
+            cat = "wedding" if "wed" in data else "family"
             await callback.message.answer(
                 text="📸 Здесь скоро появятся примеры наших работ.\n\nВы можете заказать постер:",
-                reply_markup=get_product_card("wedding" if "wed" in data else "family"))
+                reply_markup=get_product_card(cat))
 
     # --- ОФОРМЛЕНИЕ ЗАКАЗА ---
-    elif data.startswith("order_"):
+    elif data.startswith("order_") and data in ["order_kids", "order_wedding", "order_family"]:
         category = data.split("_")[1]
-        if category in ["classic", "portrait", "collage", "date"]:
-            category = "kids"
-
         await callback.message.edit_text(
             text="📝 Оформление заказа\n\n1/4\nКакой постер вы хотите заказать?",
             reply_markup=get_order_menu(category)
@@ -268,6 +266,11 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
 # --- ОБРАБОТЧИК ТЕКСТА И ФОТО (FSM) ---
 @dp.message()
 async def text_handler(message: Message, state: FSMContext):
+    # --- ВРЕМЕННЫЙ КОД ДЛЯ ПОЛУЧЕНИЯ ID (УБРАТЬ ПОСЛЕ ИСПОЛЬЗОВАНИЯ) ---
+    if message.photo:
+        logger.info(f"=== ВАШ FILE_ID: {message.photo[-1].file_id} ===")
+    # ----------------------------------------------------------------------
+
     current_state = await state.get_state()
 
     if current_state == OrderState.waiting_for_photo.state:
