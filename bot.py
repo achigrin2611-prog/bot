@@ -24,11 +24,13 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 # --- ID КАРТИНОК (ФИНАЛЬНЫЕ) ---
-PHOTO_PRICES = "AgACAgIAAxkBAAIB72rp9kXATzZaKW2Z_2zQ75UPl1MwAAKsImsb-mtQSw3JjMm4OnifAQADAgADeQADPQQ"
+# Старый ID прайса, который точно работал:
+PHOTO_PRICES = "AgACAgIAAxkBAAEkLbZq6exb4wQPxRwB7PQg6kDJ3RomBgACRCprG0PhSUtCEnatwlenmgEAAwIAA3kAAz0E"
+
+# ID метрик:
 PHOTO_KIDS_1 = "AgACAgIAAxkBAAIBmGrp8AtEHNcbDVxw0nnCAAHU675X-gAClyBrG_8HUUs6jrIwrwbNNgEAAwIAA3kAAz0E"
 PHOTO_KIDS_2 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
-PHOTO_KIDS_3 = "AgACAgIAAxkBAAIBl2rp7_1Ix8L4cacnYJNniGe0qgZ7AAKeIGsb_wdRS9YmPc1rG34dAQADAgADeQADPQQ"
-
+PHOTO_KIDS_3 = "AgACAgIAAxkBAAIB72rp9kXATzZaKW2Z_2zQ75UPl1MwAAKsImsb-mtQSw3JjMm4OnifAQADAgADeQADPQQ"
 
 
 # --- МАШИНА СОСТОЯНИЙ (FSM) ---
