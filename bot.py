@@ -23,11 +23,11 @@ logger = logging.getLogger(__name__)
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# --- ID КАРТИНОК ---
+# --- ID КАРТИНОК (ФИНАЛЬНЫЕ) ---
 PHOTO_PRICES = "AgACAgIAAxkBAAIBl2rp7_1Ix8L4cacnYJNniGe0qgZ7AAKeIGsb_wdRS9YmPc1rG34dAQADAgADeQADPQQ"
 PHOTO_KIDS_1 = "AgACAgIAAxkBAAIBmGrp8AtEHNcbDVxw0nnCAAHU675X-gAClyBrG_8HUUs6jrIwrwbNNgEAAwIAA3kAAz0E"
 PHOTO_KIDS_2 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
-PHOTO_KIDS_3 = "AgACAgIAAxkBAAIBn2rp8RxMLeogjIaFBdYS5kDhBTjYAAKcIGsb_wdRS2MiPEbD6mNsAQADAgADeQADPQQ"
+PHOTO_KIDS_3 = "AgACAgIAAxkBAAIB72rp9kXATzZaKW2Z_2zQ75UPl1MwAAKsImsb-mtQSw3JjMm4OnifAQADAgADeQADPQQ"
 
 
 # --- МАШИНА СОСТОЯНИЙ (FSM) ---
@@ -259,14 +259,8 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-# --- ОБРАБОТЧИК ТЕКСТА И ФОТО (FSM) ---
 @dp.message()
 async def text_handler(message: Message, state: FSMContext):
-    # --- ВРЕМЕННЫЙ КОД ДЛЯ ПОЛУЧЕНИЯ ID (УБРАТЬ ПОСЛЕ ИСПОЛЬЗОВАНИЯ) ---
-    if message.photo:
-        logger.info(f"=== ВАШ FILE_ID: {message.photo[-1].file_id} ===")
-    # ----------------------------------------------------------------------
-
     current_state = await state.get_state()
 
     if current_state == OrderState.waiting_for_photo.state:
