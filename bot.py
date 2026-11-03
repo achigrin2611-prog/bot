@@ -24,6 +24,7 @@ bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 # --- ID КАРТИНОК (ЗАМЕНИ НА СВОИ) ---
+# --- ID КАРТИНОК (ПРАВИЛЬНЫЕ) ---
 PHOTO_PRICES = "AgACAgIAAxkBAAEkLbZq6exb4wQPxRwB7PQg6kDJ3RomBgACRCprG0PhSUtCEnatwlenmgEAAwIAA3kAAz0E"
 PHOTO_KIDS_1 = "AgACAgIAAxkBAAEkLbpq6e0RLHuOUNc2PFduCJxqEe0kTgAClyBrG_8HUUu0LHvuVFmqawEAAwIAA3kAAz0E"
 PHOTO_KIDS_2 = "AgACAgIAAxkBAAEkLbxq6e0rghdMdlt5gPX7KzxMw_O29QACnCBrG_8HUUsKT79JrHjVegEAAwIAA3kAAz0E"
