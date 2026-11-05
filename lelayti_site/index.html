@@ -3,490 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Lelayti — Храню ваши воспоминания</title>
-    <!-- Иконка сайта (favicon) -->
+    <title>Lelayti Shop</title>
+
+    <!-- Иконка сайта -->
     <link rel="icon" href="logo.jpg" type="image/jpeg">
+
     <!-- Скрипт Telegram Mini App -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* Базовые настройки */
+        /* --- БАЗОВЫЕ НАСТРОЙКИ --- */
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Georgia', serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #faf8f5;
             color: #333;
-            line-height: 1.6;
-            scroll-behavior: smooth;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        h1, h2, h3 {
-            font-weight: normal;
-            color: #2c2c2c;
-            margin-top: 0;
+        /* --- ЭКРАН ЗАГРУЗКИ --- */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #faf8f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
         }
 
-        a { text-decoration: none; color: inherit; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e8e4db;
+            border-top: 3px solid #7b8b6f;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
 
-        /* Шапка (адаптивная) */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loader-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* --- ШАПКА --- */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 5%;
-            background-color: rgba(250, 248, 245, 0.95);
-            position: fixed;
-            width: 100%;
+            padding: 12px 15px;
+            background-color: #faf8f5;
+            position: sticky;
             top: 0;
-            box-sizing: border-box;
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            backdrop-filter: blur(5px);
+            z-index: 100;
+            border-bottom: 1px solid #efece6;
         }
 
         .logo {
-            font-size: 24px;
+            font-family: 'Georgia', serif;
+            font-size: 18px;
             letter-spacing: 2px;
-            text-transform: lowercase;
             color: #4a4a4a;
         }
 
-        .header-btn {
-            font-family: Arial, sans-serif;
-            font-size: 13px;
-            padding: 8px 15px;
-            border: 1px solid #7b8b6f;
-            color: #7b8b6f;
-            border-radius: 30px;
-            transition: all 0.4s ease;
+        /* --- КОНТЕНТ (Переключаемые страницы) --- */
+        .page {
+            display: none;
+            padding-bottom: 80px;
         }
 
-        /* Главный экран (адаптивный) */
+        .page.active {
+            display: block;
+        }
+
+        /* Главная */
         .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 30px 15px;
             text-align: center;
-            padding: 80px 20px 40px;
-            background: linear-gradient(rgba(250, 248, 245, 0.7), rgba(250, 248, 245, 0.85)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
-            box-sizing: border-box;
+            background: linear-gradient(rgba(250, 248, 245, 0.85), rgba(250, 248, 245, 0.95)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop') center/cover;
         }
 
         .hero h1 {
-            font-size: 38px;
-            margin-bottom: 15px;
-            letter-spacing: 1px;
-            line-height: 1.2;
-            text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.9);
+            font-family: 'Georgia', serif;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: normal;
         }
 
         .hero p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            color: #444;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            text-shadow: 1px 1px 5px rgba(255, 255, 255, 0.8);
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 20px;
         }
 
-        .btn {
+        .btn-main {
             display: inline-block;
-            padding: 15px 35px;
+            padding: 10px 25px;
             background-color: #7b8b6f;
             color: white;
-            border-radius: 40px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            font-family: Arial, sans-serif;
-            box-shadow: 0 4px 15px rgba(123, 139, 111, 0.3);
-            cursor: pointer;
-            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            text-decoration: none;
+            font-weight: 500;
         }
 
-        /* Блок Преимуществ */
-        .features {
-            padding: 40px 5%;
+        /* Секции */
+        .section-title {
+            font-family: 'Georgia', serif;
+            font-size: 18px;
             text-align: center;
-            background-color: #fff;
+            margin: 20px 0 15px;
         }
 
-        .features h2 {
-            font-size: 28px;
-            margin-bottom: 30px;
-        }
-
-        .features-grid {
+        /* Преимущества */
+        .features-list {
+            padding: 0 15px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
-            max-width: 600px;
-            margin: 0 auto;
+            gap: 10px;
         }
 
         .feature-item {
-            padding: 20px;
-            background-color: #faf8f5;
-            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #fff;
+            padding: 12px;
+            border-radius: 12px;
         }
 
         .feature-icon {
-            font-size: 30px;
-            margin-bottom: 10px;
+            font-size: 20px;
         }
 
-        .feature-item h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-
-        .feature-item p {
-            color: #777;
-            font-family: Arial, sans-serif;
+        .feature-text h3 {
             font-size: 14px;
+            margin: 0 0 2px;
+            font-weight: bold;
+        }
+
+        .feature-text p {
+            font-size: 12px;
+            margin: 0;
+            color: #777;
         }
 
         /* Галерея */
-        .gallery {
-            padding: 40px 5%;
-            background-color: #faf8f5;
-            text-align: center;
-        }
-
-        .gallery h2 {
-            font-size: 28px;
-            margin-bottom: 30px;
-        }
-
-        .grid {
+        .gallery-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            max-width: 1200px;
-            margin: 0 auto;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            padding: 0 15px;
         }
 
         .gallery-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .gallery-img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
+            position: relative;
             border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            overflow: hidden;
+            height: 140px;
         }
 
-        .img-caption {
-            font-family: 'Georgia', serif;
-            font-size: 13px;
-            color: #4a4a4a;
-            margin-top: 5px;
-            margin-bottom: 0;
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .gallery-cta {
-            margin-top: 40px;
+        .gallery-item span {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            color: white;
+            font-size: 10px;
+            padding: 4px;
             text-align: center;
         }
 
-        .gallery-cta p {
-            font-size: 18px;
-            color: #333;
-            margin-bottom: 15px;
-            font-family: 'Georgia', serif;
-        }
-
-        /* Блок "Как это работает" */
-        .how-it-works {
-            padding: 40px 5%;
-            text-align: center;
-            background-color: #fff;
-        }
-
-        .how-it-works h2 {
-            font-size: 28px;
-            margin-bottom: 30px;
-        }
-
-        .steps {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .step {
-            text-align: left;
-            padding: 10px 0;
-        }
-
-        .step-number {
-            font-size: 36px;
-            color: transparent;
-            -webkit-text-stroke: 1.5px #7b8b6f;
-            margin-bottom: 5px;
-            font-family: Arial, sans-serif;
-            font-weight: bold;
-            opacity: 0.8;
-        }
-
-        .step h3 {
-            font-size: 18px;
-            margin-bottom: 5px;
-        }
-
-        .step p {
-            color: #777;
-            font-size: 14px;
-        }
-
-        /* Блок формы заказа */
-        .order-section {
-            padding: 40px 5%;
-            background-color: #f0ece4;
-            text-align: center;
-        }
-
-        .order-section h2 {
-            font-size: 28px;
-            margin-bottom: 15px;
-        }
-
-        .order-section p {
-            color: #555;
-            margin-bottom: 25px;
-            font-family: Arial, sans-serif;
-            font-size: 14px;
-        }
-
-        .order-form {
-            max-width: 500px;
-            margin: 0 auto;
-            text-align: left;
+        /* Форма */
+        .form-container {
+            padding: 0 15px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
-            font-family: Arial, sans-serif;
-            font-size: 13px;
-            color: #4a4a4a;
+            font-size: 12px;
+            color: #555;
+            margin-bottom: 4px;
         }
 
-        .form-group input, .form-group textarea {
+        .form-group input,
+        .form-group textarea {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            box-sizing: border-box;
-            background-color: #fff;
+            font-size: 14px;
+            background: #fff;
         }
 
         .form-group textarea {
-            resize: vertical;
-            height: 80px;
+            height: 70px;
+            resize: none;
         }
 
-        /* Подвал */
-        footer {
-            text-align: center;
-            padding: 30px;
-            background-color: #faf8f5;
-            color: #888;
-            font-size: 12px;
-            font-family: Arial, sans-serif;
+        /* Кнопка отправки для браузера */
+        .btn-submit-browser {
+            display: none;
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #7b8b6f;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
         }
 
-        /* Адаптация под большие экраны (компьютеры) */
-        @media (min-width: 768px) {
-            .hero h1 { font-size: 52px; }
-            .hero p { font-size: 22px; }
-            .features-grid { flex-direction: row; }
-            .grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-            .gallery-img { height: 350px; }
-            .steps { flex-direction: row; }
-            .step { flex: 1; }
+        /* --- НИЖНЕЕ МЕНЮ --- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+            border-top: 1px solid #efece6;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 10px;
+            color: #999;
+            cursor: pointer;
+            width: 33%;
+        }
+
+        .nav-item.active {
+            color: #7b8b6f;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+
+        /* Если это не Telegram, делаем меню чуть выше */
+        body:not(.tg-app) .bottom-nav {
+            position: sticky;
+            bottom: 0;
         }
     </style>
 </head>
 <body>
 
+    <!-- ЭКРАН ЗАГРУЗКИ -->
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ШАПКА -->
     <header>
         <div class="logo">lelayti</div>
-        <a href="#order-form" class="header-btn">Оформить заказ</a>
     </header>
 
-    <section class="hero">
-        <div>
+    <!-- СТРАНИЦА 1: ГЛАВНАЯ -->
+    <div id="page-home" class="page active">
+        <div class="hero">
             <h1>Храню ваши воспоминания</h1>
-            <p>Создаём персонализированные постеры, которые сохранят самые важные моменты вашей жизни на долгие годы.</p>
-            <a href="#order-form" class="btn">Оставить заявку</a>
+            <p>Создаём персонализированные постеры, которые сохранят важные моменты на долгие годы.</p>
+            <a href="#" onclick="switchTab('page-form')" class="btn-main">Оставить заявку</a>
         </div>
-    </section>
 
-    <section class="features">
-        <h2>Почему выбирают нас</h2>
-        <div class="features-grid">
+        <h2 class="section-title">Почему мы?</h2>
+        <div class="features-list">
             <div class="feature-item">
                 <div class="feature-icon">🖼️</div>
-                <h3>Индивидуальный дизайн</h3>
-                <p>Мы не используем шаблоны. Каждый постер создается с любовью под вашу историю.</p>
+                <div class="feature-text">
+                    <h3>Индивидуальный дизайн</h3>
+                    <p>Каждый постер создается под вашу историю.</p>
+                </div>
             </div>
             <div class="feature-item">
                 <div class="feature-icon">✨</div>
-                <h3>Премиум качество</h3>
-                <p>Используем только плотную матовую бумагу и качественную печать для долговечности.</p>
-            </div>
-            <div class="feature-item">
-                <div class="feature-icon">⚡</div>
-                <h3>Быстро и удобно</h3>
-                <p>Электронный формат за 1-2 дня. Печатный формат за 1-3 дня + доставка.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="gallery">
-        <h2>Наши работы</h2>
-        <div class="grid">
-            <div class="gallery-item">
-                <img src="kids1.jpg" alt="Детская метрика" class="gallery-img">
-                <p class="img-caption">Детская метрика</p>
-            </div>
-            <div class="gallery-item">
-                <img src="kids2.jpg" alt="Детская метрика Портрет" class="gallery-img">
-                <p class="img-caption">Портрет с текстом</p>
-            </div>
-            <div class="gallery-item">
-                <img src="kids3.jpg" alt="Детская метрика Коллаж" class="gallery-img">
-                <p class="img-caption">Детский коллаж</p>
-            </div>
-            <div class="gallery-item">
-                <img src="свадебные (2).jpg" alt="Свадебный постер" class="gallery-img">
-                <p class="img-caption">Свадебный постер</p>
-            </div>
-            <div class="gallery-item">
-                <img src="свадебные (3).jpg" alt="Свадебный постер" class="gallery-img">
-                <p class="img-caption">Свадебная история</p>
-            </div>
-            <div class="gallery-item">
-                <img src="семейные4 (1).jpg" alt="Семейный постер" class="gallery-img">
-                <p class="img-caption">Семейный коллаж</p>
+                <div class="feature-text">
+                    <h3>Премиум качество</h3>
+                    <p>Плотная матовая бумага и качественная печать.</p>
+                </div>
             </div>
         </div>
 
-        <div class="gallery-cta">
-            <p>В нашем боте вы можете увидеть все наши работы!</p>
-            <a href="https://t.me/lelayti_bot" target="_blank" class="btn">Перейти в бота ❤️</a>
-        </div>
-    </section>
-
-    <section class="how-it-works">
-        <h2>Как это работает?</h2>
-        <div class="steps">
-            <div class="step">
-                <div class="step-number">01</div>
-                <h3>Выбираете дизайн</h3>
-                <p>Открываете каталог в нашем боте и выбираете понравившийся шаблон.</p>
+        <h2 class="section-title">Наши работы</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item">
+                <img src="kids1.jpg" alt="Детская метрика">
+                <span>Детская метрика</span>
             </div>
-            <div class="step">
-                <div class="step-number">02</div>
-                <h3>Присылаете фото</h3>
-                <p>Делитесь с нами вашими любимыми снимками и пожеланиями.</p>
+            <div class="gallery-item">
+                <img src="kids2.jpg" alt="Портрет с текстом">
+                <span>Портрет с текстом</span>
             </div>
-            <div class="step">
-                <div class="step-number">03</div>
-                <h3>Получаете готовый файл</h3>
-                <p>После оплаты мы создаём макет и отправляем вам готовый файл для печати.</p>
+            <div class="gallery-item">
+                <img src="kids3.jpg" alt="Детский коллаж">
+                <span>Детский коллаж</span>
+            </div>
+            <div class="gallery-item">
+                <img src="свадебные (2).jpg" alt="Свадебный постер">
+                <span>Свадебный постер</span>
             </div>
         </div>
-    </section>
+        <div style="text-align: center; margin-top: 15px; padding-bottom: 15px;">
+            <a href="https://t.me/lelayti_bot" target="_blank" class="btn-main">Больше работ в боте ❤️</a>
+        </div>
+    </div>
 
-    <section class="order-section" id="order-form">
-        <h2>Оставить заявку</h2>
-        <p>Заполните форму ниже, и мы свяжемся с вами для обсуждения деталей.</p>
+    <!-- СТРАНИЦА 2: КАТАЛОГ -->
+    <div id="page-catalog" class="page">
+        <h2 class="section-title" style="margin-top: 30px;">Каталог</h2>
+        <div style="text-align: center; padding: 20px; color: #777; font-size: 14px;">
+            Здесь скоро появится полный каталог.
+        </div>
+    </div>
 
-        <div class="order-form">
+    <!-- СТРАНИЦА 3: ФОРМА -->
+    <div id="page-form" class="page">
+        <h2 class="section-title" style="margin-top: 30px;">Оставить заявку</h2>
+        <div class="form-container">
             <div class="form-group">
-                <label for="name">Ваше имя</label>
-                <input type="text" id="name" placeholder="Как к вам обращаться?" required>
+                <label>Ваше имя</label>
+                <input type="text" id="name" placeholder="Имя" required>
             </div>
             <div class="form-group">
-                <label for="contact">Контакт для связи (Telegram или телефон)</label>
-                <input type="text" id="contact" placeholder="@username или +7..." required>
+                <label>Контакт</label>
+                <input type="text" id="contact" placeholder="@username или телефон" required>
             </div>
             <div class="form-group">
-                <label for="comment">Комментарий к заказу</label>
-                <textarea id="comment" placeholder="Какой постер хотите? Есть ли пожелания по дизайну?"></textarea>
+                <label>Пожелания</label>
+                <textarea id="comment" placeholder="Какой постер хотите?"></textarea>
             </div>
-            <!-- Эта кнопка скроется, так как мы используем нативную MainButton -->
-            <button class="btn" onclick="sendOrder()" style="width: 100%;">Отправить в Telegram</button>
+            <!-- Кнопка для обычного браузера -->
+            <button class="btn-submit-browser" id="btn-submit-browser" onclick="sendOrderBrowser()">Отправить заявку</button>
         </div>
-    </section>
+    </div>
 
-    <footer>
-        &copy; 2024 Lelayti. Все права защищены.
-    </footer>
+    <!-- НИЖНЕЕ МЕНЮ -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('page-home')" id="nav-home">
+            <div class="nav-icon">🏠</div>
+            <span>Главная</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('page-catalog')" id="nav-catalog">
+            <div class="nav-icon">📁</div>
+            <span>Каталог</span>
+        </div>
+        <div class="nav-item" onclick="switchTab('page-form')" id="nav-form">
+            <div class="nav-icon">📝</div>
+            <span>Заявка</span>
+        </div>
+    </div>
 
     <script>
-        // Инициализация Telegram Mini App
+        // 1. ИНИЦИАЛИЗАЦИЯ TELEGRAM
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачиваем на весь экран
+        const isTg = tg.initData !== "";
 
-        // Получаем данные пользователя
-        const user = tg.initDataUnsafe?.user;
-        if (user) {
-            const nameInput = document.getElementById('name');
-            if (nameInput && !nameInput.value) {
-                nameInput.value = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        if (isTg) {
+            document.body.classList.add('tg-app');
+            tg.expand();
+            tg.MainButton.setText("ОТПРАВИТЬ ЗАЯВКУ");
+            tg.MainButton.color = "#7b8b6f";
+        } else {
+            document.getElementById('btn-submit-browser').style.display = 'block';
+        }
+
+        // 2. СКРЫТИЕ ЭКРАНА ЗАГРУЗКИ
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loader').classList.add('loader-hidden');
+            }, 500);
+        });
+
+        // 3. ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
+        function switchTab(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+            document.getElementById(pageId).classList.add('active');
+
+            const navBtn = document.getElementById(pageId.replace('page-', 'nav-'));
+            if (navBtn) navBtn.classList.add('active');
+
+            if (pageId === 'page-form') {
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    const nameInput = document.getElementById('name');
+                    if (nameInput && !nameInput.value) {
+                        nameInput.value = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+                    }
+                }
+                if (isTg) tg.MainButton.show();
+            } else {
+                if (isTg) tg.MainButton.hide();
             }
         }
 
-        // Настраиваем нативную кнопку Telegram (MainButton)
-        tg.MainButton.setText("ОТПРАВИТЬ ЗАЯВКУ");
-        tg.MainButton.color = "#7b8b6f";
-        tg.MainButton.textColor = "#ffffff";
-        tg.MainButton.show();
-
-        // Когда нажимают нативную кнопку
+        // 4. ОТПРАВКА В TELEGRAM
         tg.MainButton.onClick(() => {
             const name = document.getElementById('name').value.trim();
             const contact = document.getElementById('contact').value.trim();
             const comment = document.getElementById('comment').value.trim();
 
             if (!name || !contact) {
-                tg.showAlert('Пожалуйста, заполните имя и контакт для связи.');
+                tg.showAlert('Пожалуйста, заполните имя и контакт.');
                 return;
             }
 
             let text = `Здравствуйте! Хочу заказать постер.\n\n`;
             text += `Имя: ${name}\n`;
             text += `Контакт: ${contact}\n`;
-            if (comment) {
-                text += `Пожелания: ${comment}\n`;
-            }
+            if (comment) text += `Пожелания: ${comment}\n`;
 
-            // Отправляем данные в бота
             tg.sendData(JSON.stringify({ order: text }));
             tg.close();
         });
 
-        // Прячем старую кнопку из HTML, так как теперь есть нативная
-        const oldButton = document.querySelector('.order-form .btn');
-        if (oldButton) oldButton.style.display = 'none';
+        // 5. ОТПРАВКА В БРАУЗЕРЕ
+        function sendOrderBrowser() {
+            const name = document.getElementById('name').value.trim();
+            const contact = document.getElementById('contact').value.trim();
+            const comment = document.getElementById('comment').value.trim();
+
+            if (!name || !contact) {
+                alert('Пожалуйста, заполните имя и контакт.');
+                return;
+            }
+
+            let text = `Здравствуйте! Хочу заказать постер.\n\n`;
+            text += `Имя: ${name}\n`;
+            text += `Контакт: ${contact}\n`;
+            if (comment) text += `Пожелания: ${comment}\n`;
+
+            window.open(`https://t.me/lelayti_bot?text=${encodeURIComponent(text)}`, '_blank');
+        }
     </script>
 </body>
 </html>
