@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lelayti — Храню ваши воспоминания</title>
     <!-- Иконка сайта (favicon) -->
     <link rel="icon" href="logo.jpg" type="image/jpeg">
@@ -19,6 +19,7 @@
             color: #333;
             line-height: 1.6;
             scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
         }
 
         h1, h2, h3 {
@@ -29,12 +30,12 @@
 
         a { text-decoration: none; color: inherit; }
 
-        /* Шапка */
+        /* Шапка (адаптивная) */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 5%;
+            padding: 15px 5%;
             background-color: rgba(250, 248, 245, 0.95);
             position: fixed;
             width: 100%;
@@ -46,50 +47,45 @@
         }
 
         .logo {
-            font-size: 28px;
-            letter-spacing: 3px;
+            font-size: 24px;
+            letter-spacing: 2px;
             text-transform: lowercase;
             color: #4a4a4a;
         }
 
         .header-btn {
             font-family: Arial, sans-serif;
-            font-size: 14px;
-            padding: 10px 20px;
+            font-size: 13px;
+            padding: 8px 15px;
             border: 1px solid #7b8b6f;
             color: #7b8b6f;
             border-radius: 30px;
             transition: all 0.4s ease;
         }
 
-        .header-btn:hover {
-            background-color: #7b8b6f;
-            color: white;
-            box-shadow: 0 4px 10px rgba(123, 139, 111, 0.3);
-        }
-
-        /* Главный экран */
+        /* Главный экран (адаптивный) */
         .hero {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 0 20px;
+            padding: 80px 20px 40px; /* Отступ сверху под шапку */
             background: linear-gradient(rgba(250, 248, 245, 0.7), rgba(250, 248, 245, 0.85)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+            box-sizing: border-box;
         }
 
         .hero h1 {
-            font-size: 52px;
-            margin-bottom: 20px;
+            font-size: 38px;
+            margin-bottom: 15px;
             letter-spacing: 1px;
             line-height: 1.2;
             text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.9);
         }
 
         .hero p {
-            font-size: 22px;
-            margin-bottom: 40px;
+            font-size: 18px;
+            margin-bottom: 30px;
             color: #444;
             max-width: 600px;
             margin-left: auto;
@@ -99,11 +95,11 @@
 
         .btn {
             display: inline-block;
-            padding: 18px 45px;
+            padding: 15px 35px;
             background-color: #7b8b6f;
             color: white;
             border-radius: 40px;
-            font-size: 18px;
+            font-size: 16px;
             transition: all 0.3s ease;
             font-family: Arial, sans-serif;
             box-shadow: 0 4px 15px rgba(123, 139, 111, 0.3);
@@ -111,79 +107,64 @@
             border: none;
         }
 
-        .btn:hover {
-            background-color: #5a664f;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(123, 139, 111, 0.4);
-        }
-
         /* Блок Преимуществ */
         .features {
-            padding: 80px 5%;
+            padding: 40px 5%;
             text-align: center;
             background-color: #fff;
         }
 
         .features h2 {
-            font-size: 36px;
-            margin-bottom: 50px;
+            font-size: 28px;
+            margin-bottom: 30px;
         }
 
         .features-grid {
             display: flex;
-            justify-content: center;
-            gap: 30px;
-            flex-wrap: wrap;
-            max-width: 1200px;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
         .feature-item {
-            flex: 1;
-            min-width: 250px;
-            padding: 30px;
+            padding: 20px;
             background-color: #faf8f5;
-            border-radius: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .feature-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            border-radius: 15px;
         }
 
         .feature-icon {
-            font-size: 40px;
-            margin-bottom: 20px;
+            font-size: 30px;
+            margin-bottom: 10px;
         }
 
         .feature-item h3 {
-            font-size: 22px;
-            margin-bottom: 15px;
+            font-size: 18px;
+            margin-bottom: 10px;
         }
 
         .feature-item p {
             color: #777;
             font-family: Arial, sans-serif;
-            font-size: 15px;
+            font-size: 14px;
         }
 
         /* Галерея */
         .gallery {
-            padding: 80px 5%;
+            padding: 40px 5%;
             background-color: #faf8f5;
             text-align: center;
         }
 
         .gallery h2 {
-            font-size: 36px;
-            margin-bottom: 50px;
+            font-size: 28px;
+            margin-bottom: 30px;
         }
 
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(2, 1fr); /* Две колонки на мобильном */
+            gap: 10px;
             max-width: 1200px;
             margin: 0 auto;
         }
@@ -196,112 +177,94 @@
 
         .gallery-img {
             width: 100%;
-            height: 350px;
+            height: 180px; /* Уменьшили высоту для мобилок */
             object-fit: cover;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: transform 0.4s ease, box-shadow 0.4s ease;
-        }
-
-        .gallery-img:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
         .img-caption {
             font-family: 'Georgia', serif;
-            font-size: 18px;
+            font-size: 13px;
             color: #4a4a4a;
-            margin-top: 15px;
+            margin-top: 5px;
             margin-bottom: 0;
         }
 
         .gallery-cta {
-            margin-top: 60px;
+            margin-top: 40px;
             text-align: center;
         }
 
         .gallery-cta p {
-            font-size: 22px;
+            font-size: 18px;
             color: #333;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             font-family: 'Georgia', serif;
         }
 
         /* Блок "Как это работает" */
         .how-it-works {
-            padding: 80px 5%;
+            padding: 40px 5%;
             text-align: center;
             background-color: #fff;
         }
 
         .how-it-works h2 {
-            font-size: 36px;
-            margin-bottom: 50px;
+            font-size: 28px;
+            margin-bottom: 30px;
         }
 
         .steps {
             display: flex;
-            justify-content: center;
-            gap: 40px;
-            flex-wrap: wrap;
-            max-width: 1200px;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
         .step {
-            flex: 1;
-            min-width: 250px;
-            max-width: 300px;
             text-align: left;
-            transition: transform 0.3s;
-        }
-
-        .step:hover {
-            transform: translateY(-5px);
+            padding: 10px 0;
         }
 
         .step-number {
-            font-size: 54px;
+            font-size: 36px;
             color: transparent;
             -webkit-text-stroke: 1.5px #7b8b6f;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             font-family: Arial, sans-serif;
             font-weight: bold;
-            opacity: 0.5;
-            transition: opacity 0.3s;
-        }
-
-        .step:hover .step-number {
-            opacity: 1;
+            opacity: 0.8;
         }
 
         .step h3 {
-            font-size: 22px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 5px;
         }
 
         .step p {
             color: #777;
-            font-size: 16px;
+            font-size: 14px;
         }
 
         /* Блок формы заказа */
         .order-section {
-            padding: 80px 5%;
+            padding: 40px 5%;
             background-color: #f0ece4;
             text-align: center;
         }
 
         .order-section h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
+            font-size: 28px;
+            margin-bottom: 15px;
         }
 
         .order-section p {
             color: #555;
-            margin-bottom: 40px;
+            margin-bottom: 25px;
             font-family: Arial, sans-serif;
+            font-size: 14px;
         }
 
         .order-form {
@@ -311,48 +274,52 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-family: Arial, sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             color: #4a4a4a;
         }
 
         .form-group input, .form-group textarea {
             width: 100%;
-            padding: 12px 15px;
+            padding: 12px;
             border: 1px solid #ccc;
             border-radius: 8px;
             font-family: Arial, sans-serif;
-            font-size: 16px;
+            font-size: 16px; /* Чтобы не было зума на iOS */
             box-sizing: border-box;
             background-color: #fff;
-            transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         .form-group textarea {
             resize: vertical;
-            height: 100px;
-        }
-
-        .form-group input:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #7b8b6f;
-            box-shadow: 0 0 0 4px rgba(123, 139, 111, 0.15);
+            height: 80px;
         }
 
         /* Подвал */
         footer {
             text-align: center;
-            padding: 40px;
+            padding: 30px;
             background-color: #faf8f5;
             color: #888;
-            font-size: 14px;
+            font-size: 12px;
             font-family: Arial, sans-serif;
+        }
+
+        /* Адаптация под большие экраны (компьютеры) */
+        @media (min-width: 768px) {
+            .hero h1 { font-size: 52px; }
+            .hero p { font-size: 22px; }
+            .features-grid { flex-direction: row; }
+            .grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+            .gallery-img { height: 350px; }
+            .steps { flex-direction: row; }
+            .step { flex: 1; }
         }
     </style>
 </head>
