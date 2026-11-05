@@ -8,8 +8,7 @@ from aiohttp import web
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, \
-    FSInputFile, WebAppInfo
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -42,8 +41,8 @@ class OrderState(StatesGroup):
 def get_reply_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
-            [KeyboardButton(text="🛍 Открыть каталог (Сайт)",
-                            web_app=WebAppInfo(url="https://lelayti.gitverse.site/lelayti-site/"))],
+            # Официальная ссылка Mini App
+            [KeyboardButton(text="🛍 Открыть каталог (Mini App)", url="https://t.me/lelayti_bot/shop")],
             [KeyboardButton(text="🏠 Главное меню")]
         ],
         resize_keyboard=True,
@@ -169,7 +168,6 @@ async def back_to_main_from_reply(message: Message, state: FSMContext):
 async def handle_web_app_data(message: Message):
     try:
         data = message.web_app_data.data
-        # Отправляем заявку Анастасии
         await bot.send_message(ADMIN_ID,
                                f"🛍 **Новая заявка из Mini App!**\n\nОт: @{message.from_user.username or 'скрыт'}\n\n{data}")
         await message.answer("✅ Спасибо! Ваша заявка отправлена. Анастасия свяжется с вами в ближайшее время.")
