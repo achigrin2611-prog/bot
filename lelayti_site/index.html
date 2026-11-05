@@ -25,7 +25,6 @@
 
         /* --- САЙТ В БРАУЗЕРЕ (КРАСИВЫЙ ЛЕНДИНГ) --- */
 
-        /* Шапка */
         header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 5%;
@@ -42,7 +41,6 @@
         }
         .header-btn:hover { background-color: #7b8b6f; color: white; box-shadow: 0 4px 10px rgba(123, 139, 111, 0.3); }
 
-        /* Главный экран */
         .hero {
             height: 100vh; display: flex; align-items: center; justify-content: center;
             text-align: center; padding: 0 20px;
@@ -58,7 +56,6 @@
         }
         .btn:hover { background-color: #5a664f; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(123, 139, 111, 0.4); }
 
-        /* Блок Преимуществ */
         .features { padding: 80px 5%; text-align: center; background-color: #fff; }
         .features h2 { font-size: 36px; margin-bottom: 50px; }
         .features-grid { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
@@ -68,7 +65,6 @@
         .feature-item h3 { font-size: 22px; margin-bottom: 15px; }
         .feature-item p { color: #777; font-family: Arial, sans-serif; font-size: 15px; }
 
-        /* Галерея */
         .gallery { padding: 80px 5%; background-color: #faf8f5; text-align: center; }
         .gallery h2 { font-size: 36px; margin-bottom: 50px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
@@ -77,7 +73,6 @@
         .gallery-img:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
         .img-caption { font-family: 'Georgia', serif; font-size: 18px; color: #4a4a4a; margin-top: 15px; margin-bottom: 0; }
 
-        /* Как это работает */
         .how-it-works { padding: 80px 5%; text-align: center; background-color: #fff; }
         .how-it-works h2 { font-size: 36px; margin-bottom: 50px; }
         .steps { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
@@ -88,7 +83,6 @@
         .step h3 { font-size: 22px; margin-bottom: 10px; }
         .step p { color: #777; font-size: 16px; }
 
-        /* Форма */
         .order-section { padding: 80px 5%; background-color: #f0ece4; text-align: center; }
         .order-section h2 { font-size: 36px; margin-bottom: 20px; }
         .order-section p { color: #555; margin-bottom: 40px; font-family: Arial, sans-serif; }
@@ -102,8 +96,11 @@
         footer { text-align: center; padding: 40px; background-color: #faf8f5; color: #888; font-size: 14px; font-family: Arial, sans-serif; }
 
         /* --- СТИЛИ ДЛЯ MINI APP (ТЕЛЕГРАМ) --- */
-        .tg-app .header-btn { display: none; } /* Прячем кнопку в шапке */
-        .tg-app .hero { height: auto; min-height: 50vh; padding: 40px 15px; }
+        .tg-app .header-btn { display: none; }
+
+        /* ИСПРАВЛЕНО: добавлен отступ сверху, чтобы заголовок не уезжал под шапку */
+        .tg-app .hero { height: auto; min-height: 50vh; padding: 80px 15px 40px; }
+
         .tg-app .hero h1 { font-size: 32px; }
         .tg-app .hero p { font-size: 16px; }
         .tg-app .features { padding: 30px 15px; }
@@ -257,7 +254,6 @@
                     <label for="comment">Комментарий к заказу</label>
                     <textarea id="comment" placeholder="Какой постер хотите? Есть ли пожелания по дизайну?"></textarea>
                 </div>
-                <!-- Кнопка для браузера (в Mini App она скрыта, используется нативная) -->
                 <button class="btn" onclick="sendOrderBrowser()" id="btn-submit-browser" style="width: 100%; display: none;">Отправить в Telegram</button>
             </div>
         </section>
@@ -319,13 +315,11 @@
             tg.expand();
             tg.MainButton.setText("ОТПРАВИТЬ ЗАЯВКУ");
             tg.MainButton.color = "#7b8b6f";
-            tg.MainButton.hide(); // Скрываем по умолчанию
+            tg.MainButton.hide();
         } else {
-            // В браузере показываем обычную кнопку
             document.getElementById('btn-submit-browser').style.display = 'block';
         }
 
-        // Переключение вкладок (для Mini App)
         function switchTab(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -344,14 +338,8 @@
             } else {
                 if (isTg) tg.MainButton.hide();
             }
-
-            // Если в браузере, скроллим к форме при клике на "Оставить заявку"
-            if (!isTg && pageId === 'page-home') {
-                 // Ничего не делаем, просто якорь
-            }
         }
 
-        // Отправка в Telegram (Mini App)
         tg.MainButton.onClick(() => {
             const name = document.getElementById('name-tg').value.trim();
             const contact = document.getElementById('contact-tg').value.trim();
@@ -369,7 +357,6 @@
             tg.close();
         });
 
-        // Отправка в браузере
         function sendOrderBrowser() {
             const name = document.getElementById('name').value.trim();
             const contact = document.getElementById('contact').value.trim();
