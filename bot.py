@@ -41,8 +41,6 @@ class OrderState(StatesGroup):
 def get_reply_keyboard():
     return ReplyKeyboardMarkup(
         keyboard=[
-            # Официальная ссылка Mini App
-            [KeyboardButton(text="🛍 Открыть каталог (Mini App)", url="https://t.me/lelayti_bot/shop")],
             [KeyboardButton(text="🏠 Главное меню")]
         ],
         resize_keyboard=True,
