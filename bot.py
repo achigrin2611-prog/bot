@@ -2,6 +2,7 @@ import os
 import logging
 import asyncio
 import urllib.parse
+import glob
 from dotenv import load_dotenv
 from aiohttp import web
 
@@ -187,11 +188,41 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
             await callback.message.answer_photo(PHOTO_KIDS_3, caption="📸 Пример: Коллаж на голубом фоне")
             await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
                                           reply_markup=get_product_card("kids"))
-        else:
-            cat = "wedding" if "wed" in data else "family"
-            await callback.message.answer(
-                text="📸 Здесь скоро появятся примеры наших работ.\n\nВы можете заказать постер:",
-                reply_markup=get_product_card(cat))
+
+        elif data == "design_all_general":
+            # --- ОПРЕДЕЛЯЕМ, ЧТО ОТПРАВЛЯТЬ ---
+            is_wedding = False
+            if callback.message.text and "Свадебные" in callback.message.text:
+                is_wedding = True
+
+            # Ищем файлы по маске (они могут называться "свадебные.jpg", "свадебные (2).jpg" и т.д.)
+            if is_wedding:
+                files = sorted(glob.glob("свадебные*.jpg"))
+                if not files:
+                    await callback.message.answer("Файлы свадебных постеров не найдены.")
+                else:
+                    for file_path in files:
+                        try:
+                            photo = FSInputFile(file_path)
+                            await callback.message.answer_photo(photo, caption="Свадебный постер")
+                        except Exception as e:
+                            logger.error(f"Ошибка отправки {file_path}: {e}")
+                    await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
+                                                  reply_markup=get_product_card("wedding"))
+            else:
+                # Для семейных
+                files = sorted(glob.glob("семейные*.jpg"))
+                if not files:
+                    await callback.message.answer("Файлы семейных постеров не найдены.")
+                else:
+                    for file_path in files:
+                        try:
+                            photo = FSInputFile(file_path)
+                            await callback.message.answer_photo(photo, caption="Семейный постер")
+                        except Exception as e:
+                            logger.error(f"Ошибка отправки {file_path}: {e}")
+                    await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
+                                                  reply_markup=get_product_card("family"))
 
     elif data.startswith("order_") and data in ["order_kids", "order_wedding", "order_family"]:
         category = data.split("_")[1]
@@ -210,18 +241,7 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
             reply_markup=cancel_builder.as_markup()
         )
 
-    # --- ИНДИВИДУАЛЬНЫЙ ЗАКАЗ (ВОЗВРАЩЕНО) ---
-    elif data == "custom":
-        await state.set_state(OrderState.waiting_for_custom_text)
-        builder = InlineKeyboardBuilder()
-        builder.row(InlineKeyboardButton(text="🔙 Отменить и в меню", callback_data="main_menu"))
-        await callback.message.edit_text(
-            text="✏️ Индивидуальный заказ\n\nОпишите вашу идею (что бы вы хотели видеть на постере, какие цвета, пожелания). Я передам это Анастасии, и она свяжется с вами!",
-            reply_markup=builder.as_markup()
-        )
-    # ------------------------------------------
-
-    elif data == "order_custom":
+    elif data == "custom" or data == "order_custom":
         await state.set_state(OrderState.waiting_for_custom_text)
         builder = InlineKeyboardBuilder()
         builder.row(InlineKeyboardButton(text="🔙 Отменить и в меню", callback_data="main_menu"))
