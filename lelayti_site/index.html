@@ -8,7 +8,6 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
-        /* --- БАЗОВЫЕ НАСТРОЙКИ --- */
         * { box-sizing: border-box; }
         body {
             margin: 0; padding: 0;
@@ -23,8 +22,7 @@
         h1, h2, h3 { font-weight: normal; color: #2c2c2c; margin-top: 0; }
         a { text-decoration: none; color: inherit; }
 
-        /* --- САЙТ В БРАУЗЕРЕ (КРАСИВЫЙ ЛЕНДИНГ) --- */
-
+        /* --- САЙТ В БРАУЗЕРЕ --- */
         header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 5%;
@@ -97,10 +95,7 @@
 
         /* --- СТИЛИ ДЛЯ MINI APP (ТЕЛЕГРАМ) --- */
         .tg-app .header-btn { display: none; }
-
-        /* ИСПРАВЛЕНО: добавлен отступ сверху, чтобы заголовок не уезжал под шапку */
         .tg-app .hero { height: auto; min-height: 50vh; padding: 80px 15px 40px; }
-
         .tg-app .hero h1 { font-size: 32px; }
         .tg-app .hero p { font-size: 16px; }
         .tg-app .features { padding: 30px 15px; }
@@ -143,7 +138,6 @@
         <a href="#order-form" class="header-btn">Оформить заказ</a>
     </header>
 
-    <!-- ГЛАВНАЯ -->
     <div id="page-home" class="page active">
         <section class="hero">
             <div>
@@ -259,7 +253,6 @@
         </section>
     </div>
 
-    <!-- КАТАЛОГ (Для Mini App) -->
     <div id="page-catalog" class="page">
         <h2 style="text-align: center; margin-top: 30px;">Каталог</h2>
         <div style="text-align: center; padding: 20px; color: #777; font-size: 14px;">
@@ -267,7 +260,6 @@
         </div>
     </div>
 
-    <!-- ЗАЯВКА (Для Mini App) -->
     <div id="page-form" class="page">
         <h2 style="text-align: center; margin-top: 30px;">Оставить заявку</h2>
         <div class="order-form" style="padding: 0 15px;">
@@ -286,7 +278,6 @@
         </div>
     </div>
 
-    <!-- НИЖНЕЕ МЕНЮ (Только для Mini App) -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('page-home')" id="nav-home">
             <div class="nav-icon">🏠</div>
