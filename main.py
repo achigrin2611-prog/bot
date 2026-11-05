@@ -8,7 +8,8 @@ from aiohttp import web
 
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, FSInputFile
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton, \
+    FSInputFile, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -40,7 +41,11 @@ class OrderState(StatesGroup):
 # --- КЛАВИАТУРЫ ---
 def get_reply_keyboard():
     return ReplyKeyboardMarkup(
-        keyboard=[[KeyboardButton(text="🏠 Главное меню")]],
+        keyboard=[
+            [KeyboardButton(text="🛍 Открыть каталог (Сайт)",
+                            web_app=WebAppInfo(url="https://lelayti.gitverse.site/lelayti-site/"))],
+            [KeyboardButton(text="🏠 Главное меню")]
+        ],
         resize_keyboard=True,
         input_field_placeholder="Выберите действие или напишите нам..."
     )
@@ -159,6 +164,20 @@ async def back_to_main_from_reply(message: Message, state: FSMContext):
     await message.answer("Вы вернулись в главное меню. Выберите действие:", reply_markup=get_main_menu())
 
 
+# --- ОБРАБОТЧИК ДАННЫХ ИЗ MINI APP (САЙТА) ---
+@dp.message(lambda message: message.web_app_data is not None)
+async def handle_web_app_data(message: Message):
+    try:
+        data = message.web_app_data.data
+        # Отправляем заявку Анастасии
+        await bot.send_message(ADMIN_ID,
+                               f"🛍 **Новая заявка из Mini App!**\n\nОт: @{message.from_user.username or 'скрыт'}\n\n{data}")
+        await message.answer("✅ Спасибо! Ваша заявка отправлена. Анастасия свяжется с вами в ближайшее время.")
+    except Exception as e:
+        logger.error(f"Ошибка при получении данных из WebApp: {e}")
+        await message.answer("Произошла ошибка при отправке. Попробуйте позже.")
+
+
 @dp.callback_query()
 async def callback_handler(callback: CallbackQuery, state: FSMContext):
     data = callback.data
@@ -190,39 +209,30 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
                                           reply_markup=get_product_card("kids"))
 
         elif data == "design_all_general":
-            # --- ОПРЕДЕЛЯЕМ, ЧТО ОТПРАВЛЯТЬ ---
             is_wedding = False
             if callback.message.text and "Свадебные" in callback.message.text:
                 is_wedding = True
 
-            # Ищем файлы по маске (они могут называться "свадебные.jpg", "свадебные (2).jpg" и т.д.)
             if is_wedding:
                 files = sorted(glob.glob("свадебные*.jpg"))
-                if not files:
-                    await callback.message.answer("Файлы свадебных постеров не найдены.")
-                else:
-                    for file_path in files:
-                        try:
-                            photo = FSInputFile(file_path)
-                            await callback.message.answer_photo(photo, caption="Свадебный постер")
-                        except Exception as e:
-                            logger.error(f"Ошибка отправки {file_path}: {e}")
-                    await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
-                                                  reply_markup=get_product_card("wedding"))
+                for file_path in files:
+                    try:
+                        photo = FSInputFile(file_path)
+                        await callback.message.answer_photo(photo, caption="Свадебный постер")
+                    except Exception as e:
+                        logger.error(f"Ошибка отправки {file_path}: {e}")
+                await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
+                                              reply_markup=get_product_card("wedding"))
             else:
-                # Для семейных
                 files = sorted(glob.glob("семейные*.jpg"))
-                if not files:
-                    await callback.message.answer("Файлы семейных постеров не найдены.")
-                else:
-                    for file_path in files:
-                        try:
-                            photo = FSInputFile(file_path)
-                            await callback.message.answer_photo(photo, caption="Семейный постер")
-                        except Exception as e:
-                            logger.error(f"Ошибка отправки {file_path}: {e}")
-                    await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
-                                                  reply_markup=get_product_card("family"))
+                for file_path in files:
+                    try:
+                        photo = FSInputFile(file_path)
+                        await callback.message.answer_photo(photo, caption="Семейный постер")
+                    except Exception as e:
+                        logger.error(f"Ошибка отправки {file_path}: {e}")
+                await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
+                                              reply_markup=get_product_card("family"))
 
     elif data.startswith("order_") and data in ["order_kids", "order_wedding", "order_family"]:
         category = data.split("_")[1]

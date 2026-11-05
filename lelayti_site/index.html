@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lelayti — Храню ваши воспоминания</title>
+    <!-- Иконка сайта (favicon) -->
+    <link rel="icon" href="logo.jpg" type="image/jpeg">
+    <!-- Скрипт Telegram Mini App -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         /* Базовые настройки */
         body {
@@ -16,7 +21,12 @@
             scroll-behavior: smooth;
         }
 
-        h1, h2, h3 { font-weight: normal; color: #2c2c2c; margin-top: 0; }
+        h1, h2, h3 {
+            font-weight: normal;
+            color: #2c2c2c;
+            margin-top: 0;
+        }
+
         a { text-decoration: none; color: inherit; }
 
         /* Шапка */
@@ -35,7 +45,12 @@
             backdrop-filter: blur(5px);
         }
 
-        .logo { font-size: 28px; letter-spacing: 3px; text-transform: lowercase; color: #4a4a4a; }
+        .logo {
+            font-size: 28px;
+            letter-spacing: 3px;
+            text-transform: lowercase;
+            color: #4a4a4a;
+        }
 
         .header-btn {
             font-family: Arial, sans-serif;
@@ -47,7 +62,11 @@
             transition: all 0.4s ease;
         }
 
-        .header-btn:hover { background-color: #7b8b6f; color: white; box-shadow: 0 4px 10px rgba(123, 139, 111, 0.3); }
+        .header-btn:hover {
+            background-color: #7b8b6f;
+            color: white;
+            box-shadow: 0 4px 10px rgba(123, 139, 111, 0.3);
+        }
 
         /* Главный экран */
         .hero {
@@ -57,7 +76,7 @@
             justify-content: center;
             text-align: center;
             padding: 0 20px;
-            background: linear-gradient(rgba(250, 248, 245, 0.85), rgba(250, 248, 245, 0.95)), url('bg.jpeg') center/cover no-repeat;
+            background: linear-gradient(rgba(250, 248, 245, 0.7), rgba(250, 248, 245, 0.85)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
         }
 
         .hero h1 {
@@ -65,7 +84,6 @@
             margin-bottom: 20px;
             letter-spacing: 1px;
             line-height: 1.2;
-            color: #1a1a1a;
             text-shadow: 2px 2px 10px rgba(255, 255, 255, 0.9);
         }
 
@@ -93,11 +111,23 @@
             border: none;
         }
 
-        .btn:hover { background-color: #5a664f; transform: translateY(-3px); box-shadow: 0 8px 20px rgba(123, 139, 111, 0.4); }
+        .btn:hover {
+            background-color: #5a664f;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(123, 139, 111, 0.4);
+        }
 
         /* Блок Преимуществ */
-        .features { padding: 80px 5%; text-align: center; background-color: #fff; }
-        .features h2 { font-size: 36px; margin-bottom: 50px; }
+        .features {
+            padding: 80px 5%;
+            text-align: center;
+            background-color: #fff;
+        }
+
+        .features h2 {
+            font-size: 36px;
+            margin-bottom: 50px;
+        }
 
         .features-grid {
             display: flex;
@@ -117,41 +147,119 @@
             transition: transform 0.3s, box-shadow 0.3s;
         }
 
-        .feature-item:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .feature-icon { font-size: 40px; margin-bottom: 20px; }
-        .feature-item h3 { font-size: 22px; margin-bottom: 15px; }
-        .feature-item p { color: #777; font-family: Arial, sans-serif; font-size: 15px; }
+        .feature-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+
+        .feature-item h3 {
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .feature-item p {
+            color: #777;
+            font-family: Arial, sans-serif;
+            font-size: 15px;
+        }
 
         /* Галерея */
-        .gallery { padding: 80px 5%; background-color: #faf8f5; text-align: center; }
-        .gallery h2 { font-size: 36px; margin-bottom: 50px; }
+        .gallery {
+            padding: 80px 5%;
+            background-color: #faf8f5;
+            text-align: center;
+        }
+
+        .gallery h2 {
+            font-size: 36px;
+            margin-bottom: 50px;
+        }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+            gap: 30px;
             max-width: 1200px;
             margin: 0 auto;
         }
 
+        .gallery-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .gallery-img {
             width: 100%;
-            height: 400px;
+            height: 350px;
             object-fit: cover;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             transition: transform 0.4s ease, box-shadow 0.4s ease;
         }
 
-        .gallery-img:hover { transform: translateY(-8px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+        .gallery-img:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1);
+        }
+
+        .img-caption {
+            font-family: 'Georgia', serif;
+            font-size: 18px;
+            color: #4a4a4a;
+            margin-top: 15px;
+            margin-bottom: 0;
+        }
+
+        .gallery-cta {
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .gallery-cta p {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 25px;
+            font-family: 'Georgia', serif;
+        }
 
         /* Блок "Как это работает" */
-        .how-it-works { padding: 80px 5%; text-align: center; background-color: #fff; }
-        .how-it-works h2 { font-size: 36px; margin-bottom: 50px; }
+        .how-it-works {
+            padding: 80px 5%;
+            text-align: center;
+            background-color: #fff;
+        }
 
-        .steps { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; max-width: 1200px; margin: 0 auto; }
-        .step { flex: 1; min-width: 250px; max-width: 300px; text-align: left; transition: transform 0.3s; }
-        .step:hover { transform: translateY(-5px); }
+        .how-it-works h2 {
+            font-size: 36px;
+            margin-bottom: 50px;
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .step {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            text-align: left;
+            transition: transform 0.3s;
+        }
+
+        .step:hover {
+            transform: translateY(-5px);
+        }
 
         .step-number {
             font-size: 54px;
@@ -164,38 +272,55 @@
             transition: opacity 0.3s;
         }
 
-        .step:hover .step-number { opacity: 1; }
-        .step h3 { font-size: 22px; margin-bottom: 10px; }
-        .step p { color: #777; font-size: 16px; }
-
-        /* Блок Цены и Услуги */
-        .prices-section { padding: 80px 5%; background-color: #faf8f5; text-align: center; }
-        .prices-section h2 { font-size: 36px; margin-bottom: 50px; }
-
-        .price-grid { display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; max-width: 1000px; margin: 0 auto; }
-
-        .price-card {
-            background: #fff;
-            padding: 30px;
-            border-radius: 20px;
-            flex: 1;
-            min-width: 280px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-            border: 1px solid #efece6;
+        .step:hover .step-number {
+            opacity: 1;
         }
 
-        .price-card h3 { font-size: 24px; margin-bottom: 20px; color: #7b8b6f; }
-        .price-card p { font-size: 18px; margin-bottom: 10px; border-bottom: 1px dashed #ddd; padding-bottom: 10px; display: flex; justify-content: space-between;}
-        .price-note { font-size: 14px; color: #888; margin-top: 20px; font-family: Arial, sans-serif; text-align: left;}
+        .step h3 {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .step p {
+            color: #777;
+            font-size: 16px;
+        }
 
         /* Блок формы заказа */
-        .order-section { padding: 80px 5%; background-color: #f0ece4; text-align: center; }
-        .order-section h2 { font-size: 36px; margin-bottom: 20px; }
-        .order-section p { color: #555; margin-bottom: 40px; font-family: Arial, sans-serif; }
+        .order-section {
+            padding: 80px 5%;
+            background-color: #f0ece4;
+            text-align: center;
+        }
 
-        .order-form { max-width: 500px; margin: 0 auto; text-align: left; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-family: Arial, sans-serif; font-size: 14px; color: #4a4a4a; }
+        .order-section h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .order-section p {
+            color: #555;
+            margin-bottom: 40px;
+            font-family: Arial, sans-serif;
+        }
+
+        .order-form {
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            color: #4a4a4a;
+        }
 
         .form-group input, .form-group textarea {
             width: 100%;
@@ -209,11 +334,26 @@
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
-        .form-group textarea { resize: vertical; height: 100px; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #7b8b6f; box-shadow: 0 0 0 4px rgba(123, 139, 111, 0.15); }
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #7b8b6f;
+            box-shadow: 0 0 0 4px rgba(123, 139, 111, 0.15);
+        }
 
         /* Подвал */
-        footer { text-align: center; padding: 40px; background-color: #faf8f5; color: #888; font-size: 14px; font-family: Arial, sans-serif; }
+        footer {
+            text-align: center;
+            padding: 40px;
+            background-color: #faf8f5;
+            color: #888;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -255,13 +395,35 @@
     <section class="gallery">
         <h2>Наши работы</h2>
         <div class="grid">
-            <img src="kids1.jpg" alt="Детская метрика Коллаж" class="gallery-img">
-            <img src="kids2.jpg" alt="Детская метрика Портрет" class="gallery-img">
-            <img src="kids3.jpg" alt="Детская метрика Коллаж 2" class="gallery-img">
-
-            <div class="placeholder" style="display:flex; align-items:center; justify-content:center; background:#e8e4db; border-radius:15px; height:400px; color:#6b6b6b;">
-                <span>💒</span> Скоро здесь появится свадебный постер
+            <div class="gallery-item">
+                <img src="kids1.jpg" alt="Детская метрика" class="gallery-img">
+                <p class="img-caption">Детская метрика</p>
             </div>
+            <div class="gallery-item">
+                <img src="kids2.jpg" alt="Детская метрика Портрет" class="gallery-img">
+                <p class="img-caption">Портрет с текстом</p>
+            </div>
+            <div class="gallery-item">
+                <img src="kids3.jpg" alt="Детская метрика Коллаж" class="gallery-img">
+                <p class="img-caption">Детский коллаж</p>
+            </div>
+            <div class="gallery-item">
+                <img src="свадебные (2).jpg" alt="Свадебный постер" class="gallery-img">
+                <p class="img-caption">Свадебный постер</p>
+            </div>
+            <div class="gallery-item">
+                <img src="свадебные (3).jpg" alt="Свадебный постер" class="gallery-img">
+                <p class="img-caption">Свадебная история</p>
+            </div>
+            <div class="gallery-item">
+                <img src="семейные4 (1).jpg" alt="Семейный постер" class="gallery-img">
+                <p class="img-caption">Семейный коллаж</p>
+            </div>
+        </div>
+
+        <div class="gallery-cta">
+            <p>В нашем боте вы можете увидеть все наши работы!</p>
+            <a href="https://t.me/lelayti_bot" target="_blank" class="btn">Перейти в бота ❤️</a>
         </div>
     </section>
 
@@ -282,27 +444,6 @@
                 <div class="step-number">03</div>
                 <h3>Получаете готовый файл</h3>
                 <p>После оплаты мы создаём макет и отправляем вам готовый файл для печати.</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="prices-section">
-        <h2>Цены и форматы</h2>
-        <div class="price-grid">
-            <div class="price-card">
-                <h3>Электронный формат</h3>
-                <p><span>«Из коллекции»</span> <b>890 ₽</b></p>
-                <p><span>«Под заказ»</span> <b>1290 ₽</b></p>
-                <div class="price-note">Срок изготовления: 1-2 дня.</div>
-            </div>
-            <div class="price-card">
-                <h3>Печатный формат А4</h3>
-                <p><span>«Из коллекции»</span> <b>1290 ₽</b></p>
-                <p><span>«Под заказ»</span> <b>1690 ₽</b></p>
-                <div class="price-note">
-                    Срок изготовления: 1-3 дня.<br><br>
-                    <b>Доставка:</b> Мы отправляем заказы удобным для вас способом. Стоимость доставки оплачивается получателем отдельно согласно тарифам выбранной службы.
-                </div>
             </div>
         </div>
     </section>
@@ -329,10 +470,14 @@
     </section>
 
     <footer>
-        &copy; 2026 Lelayti. Все права защищены.
+        &copy; 2024 Lelayti. Все права защищены.
     </footer>
 
     <script>
+        // Инициализация Telegram Mini App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем на весь экран
+
         function sendOrder() {
             const name = document.getElementById('name').value.trim();
             const contact = document.getElementById('contact').value.trim();
@@ -343,18 +488,19 @@
                 return;
             }
 
+            // Формируем текст
             let text = `Здравствуйте! Хочу заказать постер.\n\n`;
             text += `Имя: ${name}\n`;
             text += `Контакт: ${contact}\n`;
-
             if (comment) {
                 text += `Пожелания: ${comment}\n`;
             }
 
-            const encodedText = encodeURIComponent(text);
-            const botLink = `https://t.me/lelayti_bot?text=${encodedText}`;
+            // Отправляем данные в бота
+            tg.sendData(JSON.stringify({ order: text }));
 
-            window.open(botLink, '_blank');
+            // Закрываем Mini App
+            tg.close();
         }
     </script>
 </body>
