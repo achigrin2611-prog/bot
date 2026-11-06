@@ -161,19 +161,6 @@ async def back_to_main_from_reply(message: Message, state: FSMContext):
     await message.answer("Вы вернулись в главное меню. Выберите действие:", reply_markup=get_main_menu())
 
 
-# --- ОБРАБОТЧИК ДАННЫХ ИЗ MINI APP (САЙТА) ---
-@dp.message(lambda message: message.web_app_data is not None)
-async def handle_web_app_data(message: Message):
-    try:
-        data = message.web_app_data.data
-        await bot.send_message(ADMIN_ID,
-                               f"🛍 **Новая заявка из Mini App!**\n\nОт: @{message.from_user.username or 'скрыт'}\n\n{data}")
-        await message.answer("✅ Спасибо! Ваша заявка отправлена. Анастасия свяжется с вами в ближайшее время.")
-    except Exception as e:
-        logger.error(f"Ошибка при получении данных из WebApp: {e}")
-        await message.answer("Произошла ошибка при отправке. Попробуйте позже.")
-
-
 @dp.callback_query()
 async def callback_handler(callback: CallbackQuery, state: FSMContext):
     data = callback.data
@@ -209,8 +196,9 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
             if callback.message.text and "Свадебные" in callback.message.text:
                 is_wedding = True
 
+            # Жестко прописываем файлы, чтобы точно нашлись
             if is_wedding:
-                files = sorted(glob.glob("свадебные*.jpg"))
+                files = ["wedding1.jpg", "wedding2.jpg", "wedding3.jpg", "wedding4.jpg", "wedding5.jpg"]
                 for file_path in files:
                     try:
                         photo = FSInputFile(file_path)
@@ -220,7 +208,7 @@ async def callback_handler(callback: CallbackQuery, state: FSMContext):
                 await callback.message.answer(text="Вам нравится? Вы можете заказать постер:",
                                               reply_markup=get_product_card("wedding"))
             else:
-                files = sorted(glob.glob("семейные*.jpg"))
+                files = ["family1.jpg", "family2.jpg", "family3.jpg", "family4.jpg"]
                 for file_path in files:
                     try:
                         photo = FSInputFile(file_path)
