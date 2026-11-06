@@ -15,14 +15,14 @@
             background-color: #faf8f5;
             color: #333;
             line-height: 1.6;
-            scroll-behavior: smooth;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
         h1, h2, h3 { font-weight: normal; color: #2c2c2c; margin-top: 0; }
         a { text-decoration: none; color: inherit; }
 
-        /* --- САЙТ В БРАУЗЕРЕ --- */
+        /* --- САЙТ В БРАУЗЕРЕ (ОСТАВЛЯЕМ КАК ЕСТЬ) --- */
         header {
             display: flex; justify-content: space-between; align-items: center;
             padding: 20px 5%;
@@ -93,29 +93,72 @@
 
         footer { text-align: center; padding: 40px; background-color: #faf8f5; color: #888; font-size: 14px; font-family: Arial, sans-serif; }
 
+
         /* --- СТИЛИ ДЛЯ MINI APP (ТЕЛЕГРАМ) --- */
-        .tg-app .header-btn { display: none; }
-        .tg-app .hero { height: auto; min-height: 50vh; padding: 80px 15px 40px; }
-        .tg-app .hero h1 { font-size: 32px; }
-        .tg-app .hero p { font-size: 16px; }
-        .tg-app .features { padding: 30px 15px; }
-        .tg-app .features-grid { flex-direction: column; gap: 15px; }
-        .tg-app .feature-item { padding: 15px; display: flex; align-items: center; gap: 15px; text-align: left; }
-        .tg-app .feature-icon { margin-bottom: 0; font-size: 24px; }
-        .tg-app .feature-item h3 { font-size: 16px; margin-bottom: 5px; }
-        .tg-app .feature-item p { font-size: 13px; }
-        .tg-app .grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-        .tg-app .gallery-img { height: 140px; border-radius: 10px; }
-        .tg-app .img-caption { font-size: 11px; font-family: Arial, sans-serif; color: #666; margin-top: 5px; }
-        .tg-app .how-it-works { padding: 30px 15px; }
-        .tg-app .steps { flex-direction: column; gap: 15px; }
-        .tg-app .step { display: flex; gap: 15px; max-width: 100%; text-align: left; }
-        .tg-app .step-number { font-size: 28px; margin-bottom: 0; line-height: 1; }
-        .tg-app .step h3 { font-size: 16px; margin-bottom: 5px; }
-        .tg-app .step p { font-size: 13px; }
-        .tg-app .order-section { padding: 30px 15px; }
+
+        /* В Телеграме шапка компактнее и без кнопки */
+        .tg-app header { padding: 15px; box-shadow: none; border-bottom: 1px solid #efece6; backdrop-filter: none; background-color: #faf8f5; }
+        .tg-app .header-btn { display: none; } /* Скрываем кнопку "Оформить заказ" */
+
+        /* Главный экран становится компактным */
+        .tg-app .hero {
+            height: auto; min-height: 50vh; padding: 60px 15px 30px;
+            background: linear-gradient(rgba(250, 248, 245, 0.9), rgba(250, 248, 245, 0.95)), url('https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat;
+        }
+        .tg-app .hero h1 { font-size: 26px; }
+        .tg-app .hero p { font-size: 14px; }
+
+        /* Карточки преимуществ в стиле Dota (сетка) */
+        .tg-app .features { padding: 20px 15px; background-color: #faf8f5; }
+        .tg-app .features h2 { font-size: 20px; margin-bottom: 15px; }
+        .tg-app .features-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
+        .tg-app .feature-item {
+            flex: none; min-width: 0; padding: 15px; background-color: #fff; border-radius: 12px;
+            display: flex; flex-direction: column; gap: 10px; text-align: left;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #efece6;
+        }
+        .tg-app .feature-icon { font-size: 24px; margin-bottom: 0; }
+        .tg-app .feature-item h3 { font-size: 14px; margin-bottom: 4px; }
+        .tg-app .feature-item p { font-size: 12px; }
+
+        /* Галерея в стиле Dota (Карточки) */
+        .tg-app .gallery { padding: 20px 15px; background-color: #faf8f5; }
+        .tg-app .gallery h2 { font-size: 20px; margin-bottom: 15px; }
+        .tg-app .grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+        }
+        .tg-app .gallery-item {
+            background: #fff; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #efece6;
+            display: flex; flex-direction: column;
+        }
+        .tg-app .gallery-img {
+            height: 140px; width: 100%; object-fit: cover; border-radius: 0;
+        }
+        .tg-app .img-caption {
+            font-size: 12px; font-family: Arial, sans-serif; color: #666;
+            margin: 0; padding: 10px; text-align: center;
+        }
+
+        /* Как это работает (Компактно) */
+        .tg-app .how-it-works { padding: 20px 15px; background-color: #faf8f5; }
+        .tg-app .how-it-works h2 { font-size: 20px; margin-bottom: 15px; }
+        .tg-app .steps { display: flex; flex-direction: column; gap: 10px; }
+        .tg-app .step {
+            display: flex; align-items: flex-start; gap: 15px;
+            background: #fff; padding: 15px; border-radius: 12px;
+            border: 1px solid #efece6; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        }
+        .tg-app .step-number { font-size: 24px; margin-bottom: 0; line-height: 1; -webkit-text-stroke: 1px #7b8b6f; }
+        .tg-app .step h3 { font-size: 14px; margin-bottom: 4px; }
+        .tg-app .step p { font-size: 12px; }
+
+        /* Форма (Компактно) */
+        .tg-app .order-section { padding: 20px 15px; background-color: #f0ece4; }
+        .tg-app .order-section h2 { font-size: 20px; }
         .tg-app .order-form { max-width: 100%; }
-        .tg-app .btn-submit-browser { display: block; width: 100%; padding: 12px; margin-top: 10px; background-color: #7b8b6f; color: white; border-radius: 8px; font-size: 14px; border: none; cursor: pointer; }
 
         /* Нижнее меню для Mini App */
         .bottom-nav { display: none; }
@@ -127,7 +170,7 @@
         }
         .tg-app .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #999; cursor: pointer; width: 33%; }
         .tg-app .nav-item.active { color: #7b8b6f; }
-        .tg-app .nav-icon { font-size: 20px; margin-bottom: 2px; }
+        .tg-app .nav-icon { font-size: 22px; margin-bottom: 2px; }
 
     </style>
 </head>
@@ -138,6 +181,7 @@
         <a href="#order-form" class="header-btn">Оформить заказ</a>
     </header>
 
+    <!-- ГЛАВНАЯ -->
     <div id="page-home" class="page active">
         <section class="hero">
             <div>
@@ -253,6 +297,7 @@
         </section>
     </div>
 
+    <!-- КАТАЛОГ (Для Mini App) -->
     <div id="page-catalog" class="page">
         <h2 style="text-align: center; margin-top: 30px;">Каталог</h2>
         <div style="text-align: center; padding: 20px; color: #777; font-size: 14px;">
@@ -260,6 +305,7 @@
         </div>
     </div>
 
+    <!-- ЗАЯВКА (Для Mini App) -->
     <div id="page-form" class="page">
         <h2 style="text-align: center; margin-top: 30px;">Оставить заявку</h2>
         <div class="order-form" style="padding: 0 15px;">
@@ -278,6 +324,7 @@
         </div>
     </div>
 
+    <!-- НИЖНЕЕ МЕНЮ (Только для Mini App) -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="switchTab('page-home')" id="nav-home">
             <div class="nav-icon">🏠</div>
